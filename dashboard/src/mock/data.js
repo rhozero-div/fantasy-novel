@@ -548,7 +548,7 @@ const episodeAnchorObjects = episodeAnchorRows.map((row, index) => ({
 const rulesDoc = {
   type: 'document',
   objectType: '项目配置',
-  label: 'writing-rules',
+  label: '写作规则',
   summary: '写作规则：禁区、风格偏好、参考范文路径。用户可自由编辑。',
   rawText: read('skill_context/writing-rules.md'),
   filePath: makeDisplayPath('skill_context/writing-rules.md'),
