@@ -78,23 +78,44 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 
 标注主弧光 + 次弧光（如有混合）。
 
-**Step 5: 输出 Scene 设计文档**
+### Step 5: 输出综合 Scene 设计文档
 
-按 `references/output-template.md` 格式输出，写入 `ep{N}/workspace/scene{N}-design.md`。
+按 `references/output-template.md` 格式输出，**所有 Scene 合并为一个综合文件**，写入 `ep{N}/workspace/ep{N}-design.md`。
 
-每个 Scene 设计文档必须显式包含一段 **Constraints Readback**，至少列出：
+每个 Scene 的设计内容必须显式包含一段 **Constraints Readback**，至少列出：
 - 使用的人物锚点
 - 使用的地域设定
 - 使用的长期线索 / 技能 / 宝物约束
 - 本 Scene 不可违背的既成事实
 
-Scene 1 → scene1-design.md，Scene 2 → scene2-design.md，以此类推。直到 Scene S 全部完成。
+**综合文件格式：**
+```markdown
+# EP{N} Scene Designs
+
+---
+
+## Scene 1: {标题}
+
+{完整 Scene 设计内容}
+
+---
+
+## Scene 2: {标题}
+
+{完整 Scene 设计内容}
+
+---
+
+...直到 Scene S 全部完成
+```
+
+以 `## Scene {N}:` 为 Scene 分隔标题，确保下游（写/QC）可通过标题层级逐 Scene 解析。
 
 ---
 
 ## 输出
 
-`ep{N}/workspace/scene{N}-design.md`
+`ep{N}/workspace/ep{N}-design.md`（综合文件，含全部 Scene 设计）
 
 **锚点变更标注：** 如本 Scene 有技能/宝物变更（获得/升级/易主），在设计文档末尾注明候选变更：
 ```
@@ -112,8 +133,8 @@ Scene 1 → scene1-design.md，Scene 2 → scene2-design.md，以此类推。直
 
 ## 已知断点
 
-- **路径**：输出必须为 `ep{N}/workspace/scene{N}-design.md`，不得写至 ep{N}/ 根目录
-- **全量输出**：本任务必须生成 Spine 中全部 Scene 的设计文档，不得遗漏
+- **路径**：输出必须为 `ep{N}/workspace/ep{N}-design.md`，不得写至 ep{N}/ 根目录
+- **全量输出**：本任务必须输出 Spine 中全部 Scene 的设计，不得遗漏
 
 ## 注意事项
 

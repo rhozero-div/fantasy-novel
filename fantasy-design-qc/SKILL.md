@@ -1,6 +1,6 @@
 ---
 name: fantasy-design-qc
-description: 幻想小说 Scene Design 质量核验。一次扫描全部 Scene Design（scene1-design.md 到 scene{S}-design.md），扫描弧光落地/Combat Mode/Scene Arc/锚点变更/衔接连贯性，只 RECORD 不 FAIL，输出结构化核验报告。触发词：「QC Scene Design」「核验 Scene 设计」。
+description: 幻想小说 Scene Design 质量核验。一次扫描综合 Scene Design 文件（`ep{N}/workspace/ep{N}-design.md`），扫描弧光落地/Combat Mode/Scene Arc/锚点变更/衔接连贯性，只 RECORD 不 FAIL，输出结构化核验报告。触发词：「QC Scene Design」「核验 Scene 设计」。
 type: protocol
 pattern: sequential
 category: creative
@@ -19,7 +19,7 @@ date_updated: 2026-05-13
 ## 输入
 
 1. EP Spine：`ep{N}/workspace/ep-spine.md`
-2. 全部 Scene Design：`ep{N}/workspace/scene1-design.md` 到 `scene{S}-design.md`
+2. Scene Design 综合文件：`ep{N}/workspace/ep{N}-design.md`
 3. 题材参数：从 `ep{N}/user_input.md` 读取
 
 ## 操作流程
@@ -30,11 +30,11 @@ date_updated: 2026-05-13
 
 - `ep{N}/workspace/ep-spine.md`
 - `ep{N}/user_input.md`
-- 所有 Scene Design：`ep{N}/workspace/scene{X}-design.md`（X = 1 到 S）
+- `ep{N}/workspace/ep{N}-design.md`
 
 不完整 → 暂停，要求补充。
 
-从 `ep{N}/workspace/ep-spine.md` 读取 Scene 总数 S，校验设计文档数量是否匹配。
+从 `ep{N}/workspace/ep-spine.md` 读取 Scene 总数 S，校验设计文档中是否包含全部 Scene。
 
 ### Step 2: 弧光落地扫描
 
@@ -93,7 +93,7 @@ date_updated: 2026-05-13
 
 所有检查项无论通过与否，**一律记入报告**，不阻塞。
 
-输出格式：`ep{N}/workspace/scene-design-qc.md`
+输出格式：`ep{N}/workspace/design-qc.md`
 
 报告结构：
 - **弧光落地**：逐 Scene 弧光节点检查结果
@@ -111,7 +111,7 @@ QC 完成后，告知用户：
 ```
 EP{N} Scene Design QC 完成。
 
-全部 {S} 个 Scene Design 已扫描，RECORD 报告已写入 ep{N}/workspace/scene-design-qc.md。
+全部 {S} 个 Scene Design 已扫描，RECORD 报告已写入 ep{N}/workspace/design-qc.md。
 
 下一步：用户手动触发 EP{N} 写作。
 ```
