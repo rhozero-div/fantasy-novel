@@ -93,7 +93,8 @@ dashboard 负责看文件、看状态、改稿；Chatbox / Agent 负责真正推
 │   ├── 地域设定集                ← 地域设定集/ 下的文件
 │   └── EP锚点                    ← EP锚点.md 表格
 ├── 项目设定                      ← 非结构化文档
-│   └── 写作纲领                  ← 写作纲领.md 全文
+│   ├── 写作规则                   ← writing-rules.md 全文（用户编辑写作规则）
+│   └── 写作风格范文              ← writing-style-sample.md 全文（可选，AI 模仿语感）
 ├── 章节流程                      ← 过程件视图
 │   └── EP{N}
 │       ├── /episodes/ep{N}/draft ← 草稿/结算判断页
@@ -125,7 +126,7 @@ my-project/
 │   ├── 技能锚点.md                 # 表格：能力列表
 │   ├── 宝物锚点.md                 # 表格：宝物/线索列表
 │   ├── EP锚点.md                   # 表格：各EP出口状态
-│   ├── 写作纲领.md                 # 文档：写作约束
+│   ├── writing-rules.md            # 文档：写作规则（用户编辑）
 │   ├── 人物设定集/                 # 人物详细履历（关联到人物锚点详情）
 │   ├── 技能设定集/                 # 技能详细设定
 │   ├── 宝物设定集/                 # 宝物详细设定
@@ -135,11 +136,10 @@ my-project/
 │   ├── ep1.md                     # 最终稿
 │   └── workspace/
 │       ├── ep-spine.md            # 脊骨设计
-│       ├── scene1-design.md       # Scene 1 设计
-│       ├── scene2-design.md       # Scene 2 设计（如有）
+│       ├── ep{N}-design.md         # Scene 设计综合文件
 │       ├── ep1.md                 # 写作中间稿
 │       ├── spine-qc.md            # 脊骨质检
-│       ├── scene-design-qc.md     # 设计质检
+│       ├── design-qc.md            # 设计质检
 │       ├── write-qc.md            # 写作质检
 │       └── anchor-update-draft.md # 锚点结算单
 ├── ep2/
@@ -174,3 +174,36 @@ my-project/
 - react-router-dom v7
 - react-markdown + remark-gfm
 - 纯 CSS（无 UI 框架）
+
+---
+
+## 版本更新历史
+
+### v2.0 — 2026-05-16
+
+**写作规则系统重做：**
+
+- 废除「写作纲领.md」的模板壳模式。原有文件内容八成为空洞通用套话（文戏质感/武戏质感/题材特定规则），Agent 无需依赖此文件也能写出合格小说。
+- 新增 `skill_context/writing-rules.md`：用户可编辑的写作规则文件。只保留三个区块——**禁区**（Ignite 时从 user_input 自动提取）、**风格偏好**（用户自行填写）、**参考范文路径**。文件开头附引导语「只挑最关键的写，规则太长反而会稀释 AI 的执行力」。
+- 新增 `skill_context/writing-style-sample.md`：可选范文文件。用户在 dashboard 中直接粘贴自己欣赏的文字（1000–2000 字），写作 Agent 在动笔前读一遍，只吸收语言风格（句式节奏、描写密度、对话长短），不复制内容。含版权提示。
+- 顶部 Agent 自动填充元数据保留（分类 + 命名风格），以 HTML 注释包裹，不受用户编辑影响。
+- 写作流程（`fantasy-scene-write`）Step 1 增加可选范文加载步骤。
+- 所有 skill 引用从 写作纲领.md 改为 writing-rules.md，并声明「`##` 标题只用于角色名」，对齐 dashboard 解析器。
+- pipeline-full-write 增加说明：writing-rules.md 只在首次 Ignite 时自动生成禁区章节，后续只读不覆写。
+
+**Dashboard 编辑器：**
+
+- 侧边栏「项目设定」入口：写作规则 + 写作风格范文（均可编辑）。
+- SettingsDocPage 从纯只读改为双栏编辑器（源码 + 预览），支持保存到文件系统。
+
+**Scene Design 文件格式变更：**
+
+- 从每 Scene 一个独立文件（scene1-design.md / scene2-design.md）改为综合文件 `ep{N}-design.md`，以 `## Scene {N}:` 标题分隔。
+- `fantasy-scene-design/fantasy-scene-write/fantasy-design-qc` 均同步更新输入/输出路径。
+- QC 输出文件名从 `scene-design-qc.md` 改为 `design-qc.md`。
+
+**Dashboard 人物锚点解析修复：**
+
+- 人物锚点.md 使用 `## 角色名` 分段 + 每段内「项目\|内容」小表的格式，但 `extractMarkdownTable()` 把全部 `|` 行当一张大表解析，导致显示大量空行角色。
+- 新增 `parseCharacterSections()` 函数，按 `##` 标题分段解析，每段独立 key-value 转对象。
+

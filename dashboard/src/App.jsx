@@ -55,7 +55,7 @@ function App() {
         {/* Unified EP document browser — splat catch-all for episodes/ep{N} */}
         <Route path="episodes/*" element={<EpisodePage />} />
 
-        {/* Settings docs — 写作纲领 / 剧情方向 */}
+        {/* Settings docs — writing-rules / 写作风格范文 */}
         <Route path="settings/:name" element={<SettingsRoute />} />
 
         <Route path="globals" element={<GlobalsRoute />} />

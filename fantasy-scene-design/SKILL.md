@@ -36,7 +36,7 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 
 从 Spine 提取 Scene 总数 S，逐 Scene 执行 Step 2-5。
 
-同时读取 `skill_context/写作纲领.md`，提取**故事分类**（日式异世界 / 修仙 / 武侠），作为立题和破题的调性基准。
+同时读取 `skill_context/writing-rules.md`，提取**故事分类**（日式异世界 / 修仙 / 武侠），作为立题和破题的调性基准。
 
 **检查本 Scene 是否有技能/宝物变更：**
 - 如有变更（获得/升级/易主），在设计文档中注明：「→ 变更需更新锚点」

@@ -544,14 +544,23 @@ const episodeAnchorObjects = episodeAnchorRows.map((row, index) => ({
   chips: [safeValue(row, ['EP']), safeValue(row, ['角色'])].filter(Boolean),
   details: Object.entries(row).filter(([, value]) => value),
 }))
-// 项目设定 — 写作纲领（可展示文档）
-const writingGuideDoc = {
+// 项目设定 — 可编辑文档
+const rulesDoc = {
   type: 'document',
   objectType: '项目配置',
-  label: '写作纲领',
-  summary: '故事分类、输出语言、硬线约束、负面约束、全局设定。',
-  rawText: read('skill_context/写作纲领.md'),
-  filePath: makeDisplayPath('skill_context/写作纲领.md'),
+  label: 'writing-rules',
+  summary: '写作规则：禁区、风格偏好、参考范文路径。用户可自由编辑。',
+  rawText: read('skill_context/writing-rules.md'),
+  filePath: makeDisplayPath('skill_context/writing-rules.md'),
+}
+
+const styleSampleDoc = {
+  type: 'document',
+  objectType: '项目配置',
+  label: '写作风格范文',
+  summary: '用于 AI 模仿语言风格。推荐 1000–2000 字，仅学语感不抄内容。',
+  rawText: read('skill_context/writing-style-sample.md'),
+  filePath: makeDisplayPath('skill_context/writing-style-sample.md'),
 }
 
 const globalsSections = [
@@ -640,7 +649,11 @@ export const globalsNavTree = globalsSections.map((section) => ({
 }))
 
 export function getSettingsDoc(name) {
-  return name === '写作纲领' ? writingGuideDoc : null
+  const map = {
+    'writing-rules': rulesDoc,
+    '写作风格范文': styleSampleDoc,
+  }
+  return map[name] || null
 }
 
 export function getGlobalsDetail(pathname) {
@@ -725,9 +738,16 @@ export const navSections = [
     defaultOpen: false,
     items: [
       {
-        to: '/settings/写作纲领',
-        label: '写作纲领',
+        to: '/settings/writing-rules',
+        label: '写作规则',
         badge: '项目配置',
+        editable: true,
+      },
+      {
+        to: '/settings/写作风格范文',
+        label: '写作风格范文',
+        badge: '项目配置',
+        editable: true,
       },
     ],
   },
