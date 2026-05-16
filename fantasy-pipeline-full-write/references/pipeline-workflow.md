@@ -25,7 +25,7 @@ flowchart TD
         S3{"fantasy-spine-qc\nPASS？"}
         S4[/"用户检查 spine 确认"/]
         S1 --> S2 --> S3
-        S3 -->|FAIL| S1
+        S3 -->|FAIL| S4FAIL[/"停止并等待用户决定\n（修 spine / 重跑 spine）"/]
         S3 -->|PASS| S4
     end
 
@@ -54,7 +54,7 @@ flowchart TD
         W2["写作产出只落在 ep{N}/workspace/ep{N}.md\nQC后复制为 ep{N}/ep{N}.md（唯一最终稿路径）"]
         W3["fantasy-write-qc\n全稿 QC（只 RECORD，输出 write-qc.md）"]
         W4["生成 anchor-update-draft.md（对象级变更单元）\n等待用户先确认草案、再决定是否写回全局锚点"]
-        W5[/"EP{N} 完成"/]
+        W5[/"若 anchor draft 已结清 → EP{N} 完成\n若未结清 → 阻塞下次 ignite"/]
         W1 --> W2 --> W3 --> W4 --> W5
     end
 
@@ -88,7 +88,7 @@ flowchart TD
 
 | 阶段 | QC Skill | 判定 |
 |------|---------|------|
-| Spine | `fantasy-spine-qc` | PASS → 停在 QC 后，等用户确认是否进入 Scene Design；FAIL → 重跑 Spine |
+| Spine | `fantasy-spine-qc` | PASS → 停在 QC 后，等用户确认是否进入 Scene Design；FAIL → 停止并等待用户决定（修 spine / 重跑 spine） |
 | Scene Design | `fantasy-design-qc` | 一次扫描全部，只 RECORD，不 FAIL；QC 后等用户手动触发写作 |
 | EP 全稿 | `fantasy-write-qc` | 只 RECORD，不 FAIL；输出 `ep{N}/workspace/write-qc.md`，生成 `anchor-update-draft.md` 并等待用户先确认草案、再决定是否更新全局锚点 |
 
@@ -119,4 +119,5 @@ flowchart TD
 - `ep{N}/workspace/write-qc.md`：保存全稿 QC 报告
 - `ep{N}/workspace/anchor-update-draft.md`：保存候选锚点更新
 - `ep{N}/ep{N}.md`：保存最终稿
-- 若 draft 未应用，则下一次 `ignite EP{N+1}` 前必须先结清
+- 若 draft 已应用：本章完成，可进入下一章 ignite
+- 若 draft 未应用：本章正文虽完成，但下一次 `ignite EP{N+1}` 前必须先结清

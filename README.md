@@ -10,16 +10,37 @@
 
 ---
 
-# fantasy-pipeline-ui
+# Fantasy Novel
 
-一个小说创作流程的工作台：在网页里看章节进度、管理全局设定、编辑稿件文件，底部对接文件系统，不依赖数据库。
+一个面向长篇幻想小说创作的 Hermes Skill family：
+它包含 **pipeline 协议、7 个执行 skill、project skeleton、workflow references，以及一个本地 dashboard**。
+
+一句话说：**Agent 推进流程，文件系统保存产物，网页负责展示结构、承接人工判断与人工修改。**
 
 ## 前置要求
 
+- Hermes Agent（用于加载与执行 skills）
 - Node.js >= 18
 - npm
 
+## Repo 里有什么
+
+```text
+fantasy-novel/
+├── fantasy-pipeline-full-write/   # 总管线协议 + workflow / orchestration / skeleton
+├── fantasy-ep-spine/              # EP 脊骨设计
+├── fantasy-spine-qc/              # Spine 核验
+├── fantasy-scene-design/          # Scene 设计（每个 Scene 单独一个 design 文件）
+├── fantasy-design-qc/             # Design 核验
+├── fantasy-scene-write/           # EP 全稿写作
+├── fantasy-write-qc/              # 全稿核验 + anchor-update-draft
+├── dashboard/                     # 本地浏览器工作台
+└── words_from_the_builder.md      # 项目引言长文
+```
+
 ## 快速开始
+
+### 1. 跑 dashboard
 
 ```bash
 cd dashboard
@@ -29,66 +50,97 @@ npm run dev
 
 浏览器打开 `http://localhost:5173`，默认加载 `demo-project/`。
 
-## 切换项目
+### 2. 切换到真实项目
 
 默认只显示 demo-project。要扫描更多项目，在 `dashboard/` 下创建 `.env` 文件：
 
-```
+```bash
 PROJECTS_DIR=/Users/me/Hermes/projects
 ```
 
 支持逗号分隔多个目录：
 
-```
+```bash
 PROJECTS_DIR=/Users/me/Hermes/projects,/Users/me/Repos
 ```
 
 参考模板见 [dashboard/.env.example](./dashboard/.env.example)。
 
-### 项目识别规则
+### 3. 在 Hermes 里跑 pipeline
+
+这个 repo 本身不直接执行创作。真正的创作流程由 Hermes Agent 加载各 skill 后推进：
+
+- `ignite` / `ignite EP{N}`
+- `EP{N} spine`
+- `开始设计`
+- `开始写`
+- `QC`
+
+dashboard 负责看文件、看状态、改稿；Chatbox / Agent 负责真正推进各阶段。
+
+## 项目识别规则
 
 目录下存在 `skill_context/` 文件夹即视为有效项目，会出现在总览页的下拉切换框中。切换后页面刷新，数据自动从新项目的文件系统推导。
 
 ## 界面导航
 
+```text
+总览                              ← hero + EP 状态卡片 + 最近更新 + 项目切换
+├── 全局对象                      ← skill_context/ 解析出的实体视图
+│   ├── 人物锚点                  ← 人物锚点.md 表格，每人可点进详情
+│   ├── 技能锚点                  ← 技能锚点.md
+│   ├── 宝物锚点                  ← 宝物锚点.md
+│   ├── 地域设定集                ← 地域设定集/ 下的文件
+│   └── EP锚点                    ← EP锚点.md 表格
+├── 项目设定                      ← 非结构化文档
+│   └── 写作纲领                  ← 写作纲领.md 全文
+├── 章节流程                      ← 过程件视图
+│   └── EP{N}
+│       ├── /episodes/ep{N}/draft ← 草稿/结算判断页
+│       └── /episodes/ep{N}       ← 修改文稿编辑器（workspace 下各文件）
+└── 章节成稿
+    └── /episodes/ep{N}/final     ← 最终稿页面
 ```
-总览                        ← 项目概览：EP 状态表 + 阻断提示 + 项目切换
-├── 全局对象                ← skill_context/ 解析出的实体视图
-│   ├── 人物锚点            ← 人物锚点.md 表格，每人可点进详情
-│   ├── 技能锚点            ← 技能锚点.md
-│   ├── 宝物锚点            ← 宝物锚点.md
-│   ├── 地域设定集          ← 地域设定集/ 下的文件
-│   └── EP锚点              ← EP锚点.md 表格
-├── 项目设定                ← 非结构化文档
-│   └── 写作纲领            ← 写作纲领.md 全文
-├── 章节流程                ← ep{N}/workspace/ 推导状态
-│   └── EP{N} → 📝 修改文稿 ← 编辑 ep{N}/workspace/ 下各文件
-└── 章节成稿                ← 有完整正文的 EP 进入成稿
-```
+
+## pipeline 与页面如何对应
+
+同一个 EP，在文件系统里会同时存在 **输入 / 过程件 / 最终稿** 三层：
+
+- `ep{N}/user_input.md` → 用户原始输入
+- `ep{N}/workspace/` → 过程层（spine / scene design / QC / write / anchor draft）
+- `ep{N}/ep{N}.md` → 最终稿
+
+页面只是把这三层映射出来：
+
+- **draft 页**：看本章结算状态、草案状态、是否阻塞下一章
+- **editor 页**：直接编辑 `workspace/` 下各 markdown 文件，并实时预览
+- **final 页**：阅读最终稿 `ep{N}/ep{N}.md`
 
 ## 项目结构约定
 
-```
+```text
 my-project/
-├── skill_context/           # 全局设定目录
-│   ├── 人物锚点.md           # 表格：角色列表
-│   ├── 技能锚点.md           # 表格：能力列表
-│   ├── 宝物锚点.md           # 表格：宝物/线索列表
-│   ├── EP锚点.md             # 表格：各EP出口状态
-│   ├── 写作纲领.md           # 文档：写作约束
-│   ├── 人物设定集/           # 人物详细履历（关联到人物锚点详情）
-│   ├── 技能设定集/           # 技能详细设定
-│   ├── 宝物设定集/           # 宝物详细设定
-│   └── 地域设定集/           # 地域描述文件
+├── skill_context/                 # 全局设定目录
+│   ├── 人物锚点.md                 # 表格：角色列表
+│   ├── 技能锚点.md                 # 表格：能力列表
+│   ├── 宝物锚点.md                 # 表格：宝物/线索列表
+│   ├── EP锚点.md                   # 表格：各EP出口状态
+│   ├── 写作纲领.md                 # 文档：写作约束
+│   ├── 人物设定集/                 # 人物详细履历（关联到人物锚点详情）
+│   ├── 技能设定集/                 # 技能详细设定
+│   ├── 宝物设定集/                 # 宝物详细设定
+│   └── 地域设定集/                 # 地域描述文件
 ├── ep1/
-│   ├── user_input.md        # 本章输入
+│   ├── user_input.md              # 本章输入
+│   ├── ep1.md                     # 最终稿
 │   └── workspace/
-│       ├── ep-spine.md      # 脊骨设计
-│       ├── scene1-design.md # Scene设计
-│       ├── ep1.md           # 正文稿件
-│       ├── spine-qc.md      # 脊骨质检
-│       ├── scene-design-qc.md # 设计质检
-│       ├── write-qc.md      # 写作质检
+│       ├── ep-spine.md            # 脊骨设计
+│       ├── scene1-design.md       # Scene 1 设计
+│       ├── scene2-design.md       # Scene 2 设计（如有）
+│       ├── ep1.md                 # 写作中间稿
+│       ├── spine-qc.md            # 脊骨质检
+│       ├── scene-design-qc.md     # 设计质检
+│       ├── write-qc.md            # 写作质检
 │       └── anchor-update-draft.md # 锚点结算单
 ├── ep2/
 └── ep3/
@@ -96,7 +148,7 @@ my-project/
 
 ## 数据流
 
-```
+```text
 文件系统 → Vite 插件 (walkDir)
          → GET /api/project 返回所有 .md 文件
          → mock/data.js 推导出 EP 状态、全局对象、导航、dashboard 数据
@@ -107,6 +159,14 @@ my-project/
 ```
 
 所有数据从文件系统推导，无独立数据库。修改 `.md` 文件后刷新页面即生效。
+
+## 文档分工
+
+- `words_from_the_builder.md`：为什么做这个项目、它想把手伸向谁
+- `README.md`：repo 导航与 dashboard / 文件结构说明
+- `fantasy-pipeline-full-write/references/pipeline-workflow.md`：正式工作流图
+- `fantasy-pipeline-full-write/references/opencode-orchestration.md`：opencode 多 agent 执行样例
+- `FAMILY_RUNTIME_POLICY.md`：public repo 与本地 runtime 的分层治理规则
 
 ## 技术栈
 
