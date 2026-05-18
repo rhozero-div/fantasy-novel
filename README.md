@@ -212,6 +212,12 @@ my-project/
 
 - README 与 USER_GUIDE 补充 mecha 题材的项目结构、全局对象、工作流说明。
 
+**Dashboard 人物来源切换：**
+
+- 人物卡片从 `人物锚点.md` 表格解析改为 `人物设定集/` 文件目录读取，与机体/科技/阵营等设定集模式统一。
+- 移除不再使用的 `parseCharacterSections()` 函数。
+- dashboard EP 状态表「打开」链接改为上下文感知：有结算单→draft，有最终稿→final，其他→编辑器。
+
 ### v2.0 — 2026-05-16
 
 **写作规则系统重做：**
@@ -235,7 +241,8 @@ my-project/
 - `fantasy-scene-design/fantasy-scene-write/fantasy-design-qc` 均同步更新输入/输出路径。
 - QC 输出文件名从 `scene-design-qc.md` 改为 `design-qc.md`。
 
-**Dashboard 人物来源切换：**
+**Dashboard 人物锚点解析修复：**
 
-- 人物卡片从 `人物锚点.md` 表格解析改为 `人物设定集/` 文件目录读取，与机体/科技/阵营等设定集模式统一。
+- 人物锚点.md 使用 `## 角色名` 分段 + 每段内「项目\|内容」小表的格式，但 `extractMarkdownTable()` 把全部 `|` 行当一张大表解析，导致显示大量空行角色。
+- 新增 `parseCharacterSections()` 函数，按 `##` 标题分段解析，每段独立 key-value 转对象。
 
