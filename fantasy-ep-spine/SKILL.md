@@ -23,11 +23,12 @@ date_updated: 2026-05-13
 | EP | 来源 |
 |----|------|
 | EP1 | `ep{N}/user_input.md` + `skill_context/人物锚点.md`（初始状态） |
-| EP2+ | `ep{N}/user_input.md` + 全局锚点（`skill_context/人物锚点.md` / `技能锚点.md` / `宝物锚点.md`）+ 可选 `skill_context/地域设定集/` |
+| EP2+ | `ep{N}/user_input.md` + 全局锚点（`skill_context/人物锚点.md` / `技能锚点.md` / `宝物锚点.md` / `机体锚点.md` / `科技锚点.md` / `阵营锚点.md`）+ 可选 `skill_context/地域设定集/` |
 
 > `user_input.md` 由用户以**自然语言**填写，不要求用户预先设计 Scene 或写结构化表格。Scene 骨架由 Spine 阶段负责派生。
 
-**全局锚点文件：** `人物锚点.md` / `技能锚点.md` / `宝物锚点.md`
+**全局锚点文件：** `人物锚点.md` / `技能锚点.md` / `宝物锚点.md`。
+题材为 `mecha` 时，额外包含 `机体锚点.md` / `科技锚点.md` / `阵营锚点.md`。
 
 ---
 
@@ -36,15 +37,18 @@ date_updated: 2026-05-13
 ### Step 1: 确定 EP 入口状态
 
 **EP1：**
-1. 读取 `ep{N}/user_input.md`（题材/人物起点/剧情起点）
-2. 读取 `skill_context/人物锚点.md`
-3. 用 ep{N}/user_input.md 填充人物锚点的「入口状态」列
+1. 读取 `skill_context/genre.md` 确定题材
+2. 读取 `ep{N}/user_input.md`（题材/人物起点/剧情起点）
+3. 读取 `skill_context/人物锚点.md`
+4. 用 ep{N}/user_input.md 填充人物锚点的「入口状态」列
 
 **EP2+：**
-1. 读取 `skill_context/人物锚点.md`，从「当前 EP 状态」列读取上一 EP 出口
-2. 读取 `skill_context/技能锚点.md` + `宝物锚点.md`
-3. 读取 `skill_context/地域设定集/` — 检查有无比 EP{N} 更早升格的 NPC（如「EP3 升格 → 配角」），如有，将该角色纳入配角候选（升格角色作为配角处理，不需要 user_input 再次描述）
-4. 检查 user_input 是否包含「升格XXX」指令，如有，按下方 Step 6.5 处理
+1. 读取 `skill_context/genre.md` 确定题材
+2. 读取 `skill_context/人物锚点.md`，从「当前 EP 状态」列读取上一 EP 出口
+3. 读取 `skill_context/技能锚点.md` + `宝物锚点.md`
+4. 如题材为 `mecha`，额外读取 `skill_context/机体锚点.md` + `科技锚点.md` + `阵营锚点.md`
+5. 读取 `skill_context/地域设定集/` — 检查有无比 EP{N} 更早升格的 NPC（如「EP3 升格 → 配角」），如有，将该角色纳入配角候选（升格角色作为配角处理，不需要 user_input 再次描述）
+6. 检查 user_input 是否包含「升格XXX」指令，如有，按下方 Step 6.5 处理
 
 > `地域设定集/` 与 NPC 升格机制属于 **optional subsystem**。若项目未启用该子系统，可跳过本步，spine 仍可独立工作。
 
@@ -76,7 +80,12 @@ date_updated: 2026-05-13
   - 文戏 / 武戏 / 混合
   - **Combat Mode**（建议标注）：俯视型 / 平视型 / 仰视型，作为 Scene Design 的初始参考，不作为写作层直接合同
 
+**题材扩展（`mecha`）：**
+- 战斗 Scene 额外标注：**交战距离**（远距离炮战 / 中距离格斗 / 近距离白兵）、**战场环境**（宇宙 / 大气层内 / 城市 / 殖民地内部 / 地面）
+- 机甲特有 Scene 类型：整备 Scene、出击 Scene、撤退 Scene
+
 详见 `references/scene-rules.md`
+题材特有规则详见 `references/mecha-spine-extensions.md`
 
 ### Step 5: 节点关系图
 
@@ -86,19 +95,31 @@ Scene 2 | 核心位移 | 文/武
 Scene 3 | 核心位移 | 文/武
 ```
 
-### Step 6: 生成/更新三套设定集
+### Step 6: 生成/更新设定集
 
-Spine 负责生成或追加三套设定集文件（人物/技能/宝物）。文件写入 `skill_context/` 下对应目录。
+Spine 负责生成或追加设定集文件。题材通用设定集（人物）始终生成；题材特定设定集按 `skill_context/genre.md` 判断。
+
+文件写入 `skill_context/` 下对应目录。
 
 **操作原则：**
 - user_input 提到 → 生成或追加
-- user_input 没提 → 跳过（宝物/技能设定集）
+- user_input 没提 → 跳过（宝物/技能/机体/科技/阵营设定集）
 - **主角必须有**人物设定集，无论 user_input 是否明确
 
 **文件位置：**
+
+通用：
 - 人物设定集：`skill_context/人物设定集/{角色名}.md`
+
+题材 `fantasy` 特有：
 - 技能设定集：`skill_context/技能设定集/{技能名}.md`
 - 宝物设定集：`skill_context/宝物设定集/{宝物名}.md`
+
+题材 `mecha` 特有：
+- 机体设定集：`skill_context/机体设定集/{机体名}.md`
+- 科技设定集：`skill_context/科技设定集/{科技名}.md`
+- 阵营设定集：`skill_context/阵营设定集/{阵营名}.md`
+- 舰艇设定集：`skill_context/舰艇设定集/{舰艇名}.md`（可选）
 
 > **升格角色**：地域锚点里有「EP{N} 升格」标记的角色 → 当配角处理，应为其生成人物设定集。
 > 这一规则仅在项目启用 `地域设定集/` 子系统时生效；未启用时可忽略。
@@ -107,13 +128,17 @@ Spine 负责生成或追加三套设定集文件（人物/技能/宝物）。文
 - 人物设定集：参照 `fantasy-pipeline-full-write/references/project-skeleton/skill_context/人物设定集/角色名.md`
 - 技能设定集：参照 `fantasy-pipeline-full-write/references/skill-design-template.md`
 - 宝物设定集：参照 `fantasy-pipeline-full-write/references/treasure-design-template.md`
+- 机体设定集：参照 `fantasy-pipeline-full-write/references/mecha-setting-templates/机体名.md`
+- 科技设定集：参照 `fantasy-pipeline-full-write/references/mecha-setting-templates/科技名.md`
+- 阵营设定集：参照 `fantasy-pipeline-full-write/references/mecha-setting-templates/阵营名.md`
+- 舰艇设定集：参照 `fantasy-pipeline-full-write/references/mecha-setting-templates/舰艇名.md`
 
 **Frontmatter（新建时必须包含）：**
 
 ```yaml
 ---
 锚点:
-  类型: 人物 / 技能 / 宝物
+  类型: 人物 / 技能 / 宝物 / 机体 / 科技 / 阵营 / 舰艇
   最近更新EP: EP{N}
 ---
 ```

@@ -19,27 +19,36 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 ## 输入
 
 1. EP Spine：`ep{N}/workspace/ep-spine.md`
-2. 题材参数：从 `ep{N}/user_input.md` 读取
-3. 锚点文件：
-   - `skill_context/技能锚点.md`（全局，读取）
-   - `skill_context/宝物锚点.md`（全局，读取）
+2. 题材参数：从 `skill_context/genre.md` 读取
+3. 锚点文件（通用）：
+   - `skill_context/技能锚点.md`（全局，读取，fantasy 题材）
+   - `skill_context/宝物锚点.md`（全局，读取，fantasy 题材）
+4. 锚点文件（mecha）：
+   - `skill_context/机体锚点.md`（全局，读取）
+   - `skill_context/科技锚点.md`（全局，读取）
+   - `skill_context/阵营锚点.md`（全局，读取）
 ## 操作流程
 
 ### Step 1: 加载上下文
 
 读取：
 - `ep{N}/workspace/ep-spine.md`
+- `skill_context/genre.md`（确定题材）
 - `ep{N}/user_input.md`（题材参数 + 人物起点）
 - `skill_context/人物锚点.md`（全局，确认当前角色弧光状态）
-- `skill_context/技能锚点.md`（全局，确认当前技能状态）
-- `skill_context/宝物锚点.md`（全局，确认当前宝物状态）
+
+题材特定读取：
+- `fantasy`：`skill_context/技能锚点.md` + `宝物锚点.md`
+- `mecha`：`skill_context/机体锚点.md` + `科技锚点.md` + `阵营锚点.md` + `skill_context/机体设定集/` + `科技设定集/` + `阵营设定集/`
 
 从 Spine 提取 Scene 总数 S，逐 Scene 执行 Step 2-5。
 
-同时读取 `skill_context/writing-rules.md`，提取**故事分类**（日式异世界 / 修仙 / 武侠），作为立题和破题的调性基准。
+同时读取 `skill_context/writing-rules.md`，提取**故事分类**（日式异世界 / 修仙 / 武侠 / 机甲），作为立题和破题的调性基准。
 
-**检查本 Scene 是否有技能/宝物变更：**
-- 如有变更（获得/升级/易主），在设计文档中注明：「→ 变更需更新锚点」
+**检查本 Scene 是否有变更：**
+- fantasy：技能/宝物变更（获得/升级/易主）
+- mecha：机体受损/升级、科技解锁、阵营关系变化
+- 如有变更，在设计文档中注明：「→ 变更需更新锚点」
 - 变更触发由设计阶段判断，实际写入由写作阶段执行
 
 ### Step 2-5: 逐 Scene 设计
@@ -72,6 +81,21 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 
 详见 `references/combat-mode.md` 的判定流程确定战斗 Mode（按力量对比分三层：俯视型/平视型/仰视型）。
 
+**题材扩展 — 机甲武戏（`mecha`）：**
+
+在武戏破题五问基础上，追加三维度：
+
+1. **机体状态**（战斗开始时）：能量% / 装甲% / 武装残量
+2. **环境利用**：地形 / 残骸 / 殖民地方块 / 友军位置
+3. **战术意图**：牵制 / 突破 / 歼灭 / 撤退 / 护卫
+
+交战距离（来自 Spine 标注）决定节奏基调：
+- 远距离炮战：节奏偏慢，强调遮蔽→探头→射击的循环
+- 中距离格斗：快速攻防转换，强调机动和武器切换
+- 近距离白兵：高密度、高情感张力
+
+详解见 `references/mecha-combat-extensions.md`。
+
 **Step 4: 匹配 Scene Arc**
 
 用 `references/scene-arc.md` 的判定流程确定本 Scene 的 Scene Arc 类型。
@@ -87,6 +111,7 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 - 使用的地域设定
 - 使用的长期线索 / 技能 / 宝物约束
 - 本 Scene 不可违背的既成事实
+- **（mecha 题材附加）** 使用的机体 / 科技 / 阵营约束、机体状态入场基线
 
 **综合文件格式：**
 ```markdown
@@ -117,11 +142,21 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 
 `ep{N}/workspace/ep{N}-design.md`（综合文件，含全部 Scene 设计）
 
-**锚点变更标注：** 如本 Scene 有技能/宝物变更（获得/升级/易主），在设计文档末尾注明候选变更：
+**锚点变更标注：** 如本 Scene 有变更，在设计文档末尾注明候选变更：
+
+**fantasy 题材：**
 ```
 ## 锚点变更
 - 【技能】炎狱术 主角：入门→熟练 → 记入 anchor-update-draft 候选项
 - 【宝物】黑铁短刃 前任持有者→主角 → 记入 anchor-update-draft 候选项（并标注相关人物锚点候选变更）
+```
+
+**mecha 题材：**
+```
+## 锚点变更
+- 【机体】RX-78-2 高达：装甲损伤65% → 记入 anchor-update-draft 候选项
+- 【科技】光束军刀 主角方：实验中→实战部署 → 记入 anchor-update-draft 候选项
+- 【阵营】地球联邦：与主角关系 所属→失踪中 → 记入 anchor-update-draft 候选项
 ```
 
 此处只记录 Scene 层候选线索，不承担 review/apply 状态。
@@ -142,3 +177,5 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 - **Scene Arc**：七型已定义（外压/内爆/博弈/揭示/抉择/关系/积累），详见 `references/scene-arc.md`。该文件属于 **design family shared references**。
 - **POV 默认**：所有在场角色 POV 全开，仅当显式写出「xxx 不开 POV」时关闭
 - **技能/宝物锚点**：scene-design 只负责标注候选变更；实际写入与汇总由后续阶段处理
+- **机体/科技/阵营锚点**：mecha 题材下同样规则，只标注候选变更，不直接写入全局
+

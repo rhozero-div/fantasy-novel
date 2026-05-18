@@ -19,6 +19,7 @@ date_updated: 2026-05-13
 1. EP Spine：`ep{N}/workspace/ep-spine.md`
 2. EP user_input：`ep{N}/user_input.md`
 3. 全局人物锚点：`skill_context/人物锚点.md`（验证入口状态）
+4. 题材声明：`skill_context/genre.md`（确定 fantasy / mecha）
 
 ## 操作流程
 
@@ -83,6 +84,19 @@ date_updated: 2026-05-13
 **武戏 Scene 无 Mode 标注 → RECORD（建议，不阻塞）。**
 **Mode 与描述明显矛盾 → FAIL。**
 
+**题材扩展（`mecha`）：**
+- 如为机甲武戏，检查交战距离（远/中/近）是否标注 → 未标注则 RECORD
+- 如为机甲武戏，检查战场环境（宇宙/大气/城市/殖民地）是否标注 → 未标注则 RECORD
+
+### Step 5.5: 机体设定集一致性扫描（仅 mecha）
+
+读取 `skill_context/genre.md` 确认题材。如为 mecha，执行：
+
+- Spine 中有出场的机体，是否存在对应的 `skill_context/机体设定集/` 文件？
+- 首次出场的机体是否已有设定文件或在 Spine 中标注「新增设定待补」？
+
+**出场机体缺少设定文件且未标注「待补」→ FAIL。**
+
 ### Step 6: 节点关系图扫描
 
 检查「节点关系图」章节：
@@ -113,7 +127,10 @@ date_updated: 2026-05-13
 | **FAIL** | 相邻 Scene 弧光重叠 | 阻塞 |
 | **FAIL** | 节点关系图与正文矛盾 | 阻塞 |
 | **FAIL** | 出口状态与终点状态矛盾 | 阻塞 |
+| **FAIL** | 出场机体缺少设定文件（mecha 题材） | 阻塞 |
 | RECORD | 武戏 Scene 无 Mode 标注 | 记入报告，不阻塞 |
+| RECORD | 机甲武戏无交战距离标注 | 记入报告，不阻塞 |
+| RECORD | 机甲武戏无战场环境标注 | 记入报告，不阻塞 |
 
 **判定逻辑**：有任何 FAIL → Spine QC FAIL。只有 RECORD → Spine QC PASS。
 
@@ -132,6 +149,7 @@ date_updated: 2026-05-13
 | EP 弧光完整性 | PASS / FAIL |
 | Scene 完整性 | PASS / FAIL |
 | Combat Mode 标注 | PASS / FAIL |
+| 机体设定集一致性 | PASS / FAIL / N/A |
 | 节点关系图 | PASS / FAIL |
 | 出口状态一致性 | PASS / FAIL |
 

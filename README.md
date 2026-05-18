@@ -12,7 +12,8 @@
 
 # Fantasy Novel
 
-一个面向长篇幻想小说创作的 Hermes Skill family：
+一个面向长篇小说创作的 Hermes Skill family：
+支持两条题材写作分支：**fantasy（奇幻）** 与 **mecha（机甲）**。
 它包含 **pipeline 协议、7 个执行 skill、project skeleton、workflow references，以及一个本地 dashboard**。
 
 一句话说：**Agent 推进流程，文件系统保存产物，网页负责展示结构、承接人工判断与人工修改。**
@@ -49,6 +50,7 @@ npm run dev
 ```
 
 浏览器打开 `http://localhost:5173`，默认加载 `demo-project/`。
+repo 还内置了一个 `dashboard/demo-mecha/` 样例，用于展示机甲题材下的对象层与流程文件。
 
 ### 2. 切换到真实项目
 
@@ -87,10 +89,10 @@ dashboard 负责看文件、看状态、改稿；Chatbox / Agent 负责真正推
 ```text
 总览                              ← hero + EP 状态卡片 + 最近更新 + 项目切换
 ├── 全局对象                      ← skill_context/ 解析出的实体视图
-│   ├── 人物锚点                  ← 人物锚点.md 表格，每人可点进详情
-│   ├── 技能锚点                  ← 技能锚点.md
-│   ├── 宝物锚点                  ← 宝物锚点.md
-│   ├── 地域设定集                ← 地域设定集/ 下的文件
+│   ├── 人物设定集                ← 人物设定集/ 文件，每人可点进详情
+│   ├── 技能锚点 / 宝物锚点       ← fantasy 题材对象
+│   ├── 机体设定集 / 科技设定集 / 阵营设定集 ← mecha 题材对象
+│   ├── 地域设定集                ← fantasy 题材下的地域文件
 │   └── EP锚点                    ← EP锚点.md 表格
 ├── 项目设定                      ← 非结构化文档
 │   ├── 写作规则                   ← writing-rules.md 全文（用户编辑写作规则）
@@ -122,16 +124,24 @@ dashboard 负责看文件、看状态、改稿；Chatbox / Agent 负责真正推
 ```text
 my-project/
 ├── skill_context/                 # 全局设定目录
+│   ├── genre.md                   # 题材：fantasy / mecha
 │   ├── 人物锚点.md                 # 表格：角色列表
-│   ├── 技能锚点.md                 # 表格：能力列表
-│   ├── 宝物锚点.md                 # 表格：宝物/线索列表
 │   ├── EP锚点.md                   # 表格：各EP出口状态
 │   ├── writing-rules.md            # 文档：写作规则（用户编辑）
 │   ├── writing-style-sample.md     # 文档：写作风格范文（可选）
 │   ├── 人物设定集/                 # 人物详细履历（关联到人物锚点详情）
-│   ├── 技能设定集/                 # 技能详细设定
-│   ├── 宝物设定集/                 # 宝物详细设定
-│   └── 地域设定集/                 # 地域描述文件
+│   ├── （fantasy）技能锚点.md       # fantasy 题材对象
+│   ├── （fantasy）宝物锚点.md       # fantasy 题材对象
+│   ├── （fantasy）技能设定集/       # fantasy 题材对象
+│   ├── （fantasy）宝物设定集/       # fantasy 题材对象
+│   ├── （fantasy）地域设定集/       # fantasy 题材对象
+│   ├── （mecha）机体锚点.md         # mecha 题材对象
+│   ├── （mecha）科技锚点.md         # mecha 题材对象
+│   ├── （mecha）阵营锚点.md         # mecha 题材对象
+│   ├── （mecha）机体设定集/         # mecha 题材对象
+│   ├── （mecha）科技设定集/         # mecha 题材对象
+│   ├── （mecha）阵营设定集/         # mecha 题材对象
+│   └── （mecha）舰艇设定集/         # mecha 题材对象（可选）
 ├── ep1/
 │   ├── user_input.md              # 本章输入
 │   ├── ep1.md                     # 最终稿
@@ -180,6 +190,28 @@ my-project/
 
 ## 版本更新历史
 
+### v2.1 — 2026-05-18
+
+**Mecha 写作分支正式并入主干：**
+
+- repo 从单一 fantasy 写作 pipeline 升级为双题材结构：`fantasy`（奇幻）与 `mecha`（机甲）。
+- 通过 `skill_context/genre.md` 显式声明题材；下游 skill 与 dashboard 根据题材分流，不再依赖模型猜测。
+- `mecha` 题材新增对象层：`机体锚点.md`、`科技锚点.md`、`阵营锚点.md`，以及对应设定集目录（机体 / 科技 / 阵营 / 舰艇）。
+- Spine / Scene Design / Scene Write / 各层 QC 全链路接入 mecha 分支：
+  - `fantasy-ep-spine/references/mecha-spine-extensions.md`
+  - `fantasy-scene-design/references/mecha-combat-extensions.md`
+  - `fantasy-scene-write/references/mecha-writing-guidelines.md`
+- dashboard 增加 mecha 对象视图：`机体设定集`、`科技设定集`、`阵营设定集`。
+- repo 内置 `dashboard/demo-mecha/` 样例项目，用于验证机甲题材下的对象层、过程件与成稿链路。
+
+**题材收口：**
+
+- 当前题材选项仅保留：`fantasy` / `mecha`。
+
+**文档同步：**
+
+- README 与 USER_GUIDE 补充 mecha 题材的项目结构、全局对象、工作流说明。
+
 ### v2.0 — 2026-05-16
 
 **写作规则系统重做：**
@@ -203,8 +235,7 @@ my-project/
 - `fantasy-scene-design/fantasy-scene-write/fantasy-design-qc` 均同步更新输入/输出路径。
 - QC 输出文件名从 `scene-design-qc.md` 改为 `design-qc.md`。
 
-**Dashboard 人物锚点解析修复：**
+**Dashboard 人物来源切换：**
 
-- 人物锚点.md 使用 `## 角色名` 分段 + 每段内「项目\|内容」小表的格式，但 `extractMarkdownTable()` 把全部 `|` 行当一张大表解析，导致显示大量空行角色。
-- 新增 `parseCharacterSections()` 函数，按 `##` 标题分段解析，每段独立 key-value 转对象。
+- 人物卡片从 `人物锚点.md` 表格解析改为 `人物设定集/` 文件目录读取，与机体/科技/阵营等设定集模式统一。
 

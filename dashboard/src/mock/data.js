@@ -245,11 +245,22 @@ function buildStageSlots(epNumber) {
   ]
 }
 
-const characterRows = extractMarkdownTable(read('skill_context/人物锚点.md'))
+// Genre detection
+const genreContent = read('skill_context/genre.md')
+const genre = extractAfterLabel(genreContent, 'genre') || 'fantasy'
+const isMecha = genre === 'mecha'
+
+const characterFiles = rawFiles.filter((file) => file.relativePath.startsWith('skill_context/人物设定集/'))
 const skillRows = extractMarkdownTable(read('skill_context/技能锚点.md'))
 const treasureRows = extractMarkdownTable(read('skill_context/宝物锚点.md'))
 const episodeAnchorRows = extractMarkdownTable(read('skill_context/EP锚点.md'))
 const regionFiles = rawFiles.filter((file) => file.relativePath.startsWith('skill_context/地域设定集/'))
+
+// Mecha-specific files
+const mechaFiles = rawFiles.filter((file) => file.relativePath.startsWith('skill_context/机体设定集/'))
+const techFiles = rawFiles.filter((file) => file.relativePath.startsWith('skill_context/科技设定集/'))
+const factionFiles = rawFiles.filter((file) => file.relativePath.startsWith('skill_context/阵营设定集/'))
+const shipFiles = rawFiles.filter((file) => file.relativePath.startsWith('skill_context/舰艇设定集/'))
 
 const anchorDraftFiles = rawFiles.filter((file) => file.relativePath.endsWith('anchor-update-draft.md'))
 const blockerDrafts = anchorDraftFiles.filter((file) => /apply status:\s*unapplied/i.test(file.content))
@@ -445,25 +456,24 @@ function buildFinalDetail(epNumber) {
 }
 
 function buildCharacterObjects() {
-  return characterRows.map((row, index) => {
-    const name = safeValue(row, ['角色', '人物', '名称'])
-    const settingPath = name ? `skill_context/人物設定集/${name}.md` : null
-    const settingFile = settingPath && exists(settingPath) ? rawFiles.find(f => f.relativePath === settingPath) : null
+  return characterFiles.map((file, index) => {
+    const title = file.relativePath.split('/').pop()?.replace('.md', '') || `人物${index + 1}`
+    const paragraphs = trimParagraphs(file.content, 2)
     return {
       id: `character-${index}`,
       type: 'object',
       objectType: '人物',
-      to: `/globals/人物锚点/${encodeURIComponent(name || `人物${index + 1}`)}`,
-      label: name || `人物${index + 1}`,
-      status: firstNonEmpty(safeValue(row, ['入口状态', '当前状态']), '状态待补'),
-      summary: objectSummary([
-        safeValue(row, ['弧线类型', '类型']),
-        safeValue(row, ['入口状态', '当前状态']),
-      ]),
-      chips: [safeValue(row, ['弧线类型', '类型']), safeValue(row, ['出口目标', '目标'])].filter(Boolean),
-      details: Object.entries(row).filter(([, value]) => value),
-      rawText: settingFile?.content || null,
-      filePath: settingFile ? makeDisplayPath(settingFile.relativePath) : null,
+      to: `/globals/人物设定集/${encodeURIComponent(title)}`,
+      label: title,
+      status: extractAfterLabel(file.content, '当前状态') || '状态待补',
+      summary: paragraphs[0] || '人物设定待补。',
+      chips: [extractAfterLabel(file.content, '弧线类型')].filter(Boolean),
+      details: [
+        ['位置', makeDisplayPath(file.relativePath)],
+        ['摘要', paragraphs[0] || '待补'],
+      ].filter(([, v]) => v),
+      rawText: file.content,
+      filePath: makeDisplayPath(file.relativePath),
     }
   })
 }
@@ -526,10 +536,85 @@ function buildRegionObjects() {
   })
 }
 
+// Mecha object builders
+function buildMechaObjects() {
+  return mechaFiles.map((file, index) => {
+    const title = file.relativePath.split('/').pop()?.replace('.md', '') || `机体${index + 1}`
+    const paragraphs = trimParagraphs(file.content, 2)
+    const pilot = extractAfterLabel(file.content, '驾驶员')
+    return {
+      id: `mecha-${index}`,
+      type: 'object',
+      objectType: '机体',
+      to: `/globals/机体设定集/${encodeURIComponent(title)}`,
+      label: title,
+      status: pilot ? `机师：${pilot}` : '状态待补',
+      summary: paragraphs[0] || '机体设定待补。',
+      chips: [extractAfterLabel(file.content, '型号'), extractAfterLabel(file.content, '所属阵营')].filter(Boolean),
+      details: [
+        ['位置', makeDisplayPath(file.relativePath)],
+        ['摘要', paragraphs[0] || '待补'],
+        ['机师', pilot || '未指定'],
+      ].filter(([, v]) => v),
+      rawText: file.content,
+      filePath: makeDisplayPath(file.relativePath),
+    }
+  })
+}
+
+function buildTechObjects() {
+  return techFiles.map((file, index) => {
+    const title = file.relativePath.split('/').pop()?.replace('.md', '') || `科技${index + 1}`
+    const paragraphs = trimParagraphs(file.content, 2)
+    return {
+      id: `tech-${index}`,
+      type: 'object',
+      objectType: '科技',
+      to: `/globals/科技设定集/${encodeURIComponent(title)}`,
+      label: title,
+      status: extractAfterLabel(file.content, '当前成熟度') || '状态待补',
+      summary: paragraphs[0] || '科技档案待补。',
+      chips: [extractAfterLabel(file.content, '类别'), extractAfterLabel(file.content, '发明/发现方')].filter(Boolean),
+      details: [
+        ['位置', makeDisplayPath(file.relativePath)],
+        ['摘要', paragraphs[0] || '待补'],
+      ].filter(([, v]) => v),
+      rawText: file.content,
+      filePath: makeDisplayPath(file.relativePath),
+    }
+  })
+}
+
+function buildFactionObjects() {
+  return factionFiles.map((file, index) => {
+    const title = file.relativePath.split('/').pop()?.replace('.md', '') || `阵营${index + 1}`
+    const paragraphs = trimParagraphs(file.content, 2)
+    return {
+      id: `faction-${index}`,
+      type: 'object',
+      objectType: '阵营',
+      to: `/globals/阵营设定集/${encodeURIComponent(title)}`,
+      label: title,
+      status: extractAfterLabel(file.content, '性质') || '状态待补',
+      summary: paragraphs[0] || '阵营档案待补。',
+      chips: [extractAfterLabel(file.content, '科技水平'), extractAfterLabel(file.content, '与主角关系')].filter(Boolean),
+      details: [
+        ['位置', makeDisplayPath(file.relativePath)],
+        ['摘要', paragraphs[0] || '待补'],
+      ].filter(([, v]) => v),
+      rawText: file.content,
+      filePath: makeDisplayPath(file.relativePath),
+    }
+  })
+}
+
 const characterObjects = buildCharacterObjects()
 const skillObjects = buildSkillObjects()
 const treasureObjects = buildTreasureObjects()
 const regionObjects = buildRegionObjects()
+const mechaObjects = buildMechaObjects()
+const techObjects = buildTechObjects()
+const factionObjects = buildFactionObjects()
 const episodeAnchorObjects = episodeAnchorRows.map((row, index) => ({
   id: `ep-${index}`,
   type: 'object',
@@ -563,48 +648,86 @@ const styleSampleDoc = {
   filePath: makeDisplayPath('skill_context/writing-style-sample.md'),
 }
 
-const globalsSections = [
-  {
-    type: 'collection',
-    to: '/globals/人物锚点',
-    label: '人物锚点',
-    summary: '人物对象视图：看角色当前状态、弧线与待处理影响。',
-    metrics: [{ label: '人物数量', value: String(characterObjects.length), sub: '来自人物锚点表' }],
-    children: characterObjects,
-  },
-  {
-    type: 'collection',
-    to: '/globals/技能锚点',
-    label: '技能锚点',
-    summary: '技能对象视图：看能力阶段、来源与状态。',
-    metrics: [{ label: '技能数量', value: String(skillObjects.length), sub: '来自技能锚点表' }],
-    children: skillObjects,
-  },
-  {
-    type: 'collection',
-    to: '/globals/宝物锚点',
-    label: '宝物锚点',
-    summary: '宝物 / 线索对象视图：看线索状态和待写回变化。',
-    metrics: [{ label: '对象数量', value: String(treasureObjects.length), sub: '来自宝物锚点表' }],
-    children: treasureObjects,
-  },
-  {
-    type: 'collection',
-    to: '/globals/地域设定集',
-    label: '地域设定集',
-    summary: '地域对象视图：看地点、摘要与当前可用信息。',
-    metrics: [{ label: '地域数量', value: String(regionObjects.length), sub: '来自地域设定集文件' }],
-    children: regionObjects,
-  },
-  {
-    type: 'collection',
-    to: '/globals/EP锚点',
-    label: 'EP锚点',
-    summary: 'EP 出口状态记录：各章各角色的入口状态→出口状态→不可逆事件。',
-    metrics: [{ label: 'EP 记录', value: String(episodeAnchorObjects.length), sub: '来自 EP锚点.md 表格' }],
-    children: episodeAnchorObjects,
-  },
-]
+const genreSections = (() => {
+  const base = [
+    {
+      type: 'collection',
+      to: '/globals/人物设定集',
+      label: '人物设定集',
+      summary: '人物对象视图：看角色当前状态、弧线与待处理影响。',
+      metrics: [{ label: '人物数量', value: String(characterObjects.length), sub: '来自人物设定集文件' }],
+      children: characterObjects,
+    },
+    {
+      type: 'collection',
+      to: '/globals/地域设定集',
+      label: '地域设定集',
+      summary: '地域对象视图：看地点、摘要与当前可用信息。',
+      metrics: [{ label: '地域数量', value: String(regionObjects.length), sub: '来自地域设定集文件' }],
+      children: regionObjects,
+    },
+    {
+      type: 'collection',
+      to: '/globals/EP锚点',
+      label: 'EP锚点',
+      summary: 'EP 出口状态记录：各章各角色的入口状态→出口状态→不可逆事件。',
+      metrics: [{ label: 'EP 记录', value: String(episodeAnchorObjects.length), sub: '来自 EP锚点.md 表格' }],
+      children: episodeAnchorObjects,
+    },
+  ]
+
+  if (isMecha) {
+    base.splice(1, 0,
+      {
+        type: 'collection',
+        to: '/globals/机体设定集',
+        label: '机体设定集',
+        summary: '机体对象视图：看型号、装备、机师与状态变化。',
+        metrics: [{ label: '机体数量', value: String(mechaObjects.length), sub: '来自机体设定集文件' }],
+        children: mechaObjects,
+      },
+      {
+        type: 'collection',
+        to: '/globals/科技设定集',
+        label: '科技设定集',
+        summary: '科技档案视图：看技术成熟度、持有方与应用。',
+        metrics: [{ label: '科技数量', value: String(techObjects.length), sub: '来自科技设定集文件' }],
+        children: techObjects,
+      },
+      {
+        type: 'collection',
+        to: '/globals/阵营设定集',
+        label: '阵营设定集',
+        summary: '势力对象视图：看阵营关系、军事力量与政治立场。',
+        metrics: [{ label: '阵营数量', value: String(factionObjects.length), sub: '来自阵营设定集文件' }],
+        children: factionObjects,
+      },
+    )
+  } else {
+    base.splice(1, 0,
+      {
+        type: 'collection',
+        to: '/globals/技能锚点',
+        label: '技能锚点',
+        summary: '技能对象视图：看能力阶段、来源与状态。',
+        metrics: [{ label: '技能数量', value: String(skillObjects.length), sub: '来自技能锚点表' }],
+        children: skillObjects,
+      },
+      {
+        type: 'collection',
+        to: '/globals/宝物锚点',
+        label: '宝物锚点',
+        summary: '宝物 / 线索对象视图：看线索状态和待写回变化。',
+        metrics: [{ label: '对象数量', value: String(treasureObjects.length), sub: '来自宝物锚点表' }],
+        children: treasureObjects,
+      },
+    )
+  }
+
+  return base
+})()
+
+const globalsSections = genreSections
 
 const globalsRouteMap = new Map()
 
@@ -612,13 +735,22 @@ const globalsOverview = {
   type: 'overview',
   label: 'Global Objects',
   summary: 'Globals 只回答对象现在处于什么状态、受哪些 EP 影响、是否还有待写回动作。',
-  metrics: [
+  metrics: isMecha ? [
+    { label: '人物对象', value: String(characterObjects.length), sub: '当前角色锚点' },
+    { label: '机体对象', value: String(mechaObjects.length), sub: '机体设定集' },
+    { label: '阵营对象', value: String(factionObjects.length), sub: '阵营设定集' },
+    { label: 'EP 记录', value: String(episodeAnchorObjects.length), sub: '出口状态记录' },
+  ] : [
     { label: '人物对象', value: String(characterObjects.length), sub: '当前角色锚点' },
     { label: '技能对象', value: String(skillObjects.length), sub: '能力与阶段' },
     { label: '宝物对象', value: String(treasureObjects.length), sub: '线索与宝物' },
     { label: 'EP 记录', value: String(episodeAnchorObjects.length), sub: '出口状态记录' },
   ],
-  meta: [
+  meta: isMecha ? [
+    ['对象页范围', '人物 / 机体 / 科技 / 阵营 / 地域 / EP锚点'],
+    ['说明', '这里只看对象状态，不替代过程文件浏览'],
+    ['最后扫描', nowTime()],
+  ] : [
     ['对象页范围', '人物 / 技能 / 宝物 / 地域 / EP锚点'],
     ['说明', '这里只看对象状态，不替代过程文件浏览'],
     ['最后扫描', nowTime()],
@@ -650,6 +782,7 @@ export const globalsNavTree = globalsSections.map((section) => ({
 
 export function getSettingsDoc(name) {
   const map = {
+    '写作规则': rulesDoc,
     'writing-rules': rulesDoc,
     '写作风格范文': styleSampleDoc,
   }
@@ -915,7 +1048,7 @@ export const dashboardData = {
       statusClass,
       note,
       next,
-      to: `/episodes/ep${ep}`, // Always point to editing page, matches sidebar nav
+      to: hasDraft ? `/episodes/ep${ep}/draft` : hasFinal ? `/episodes/ep${ep}/final` : `/episodes/ep${ep}`,
       progressStage: stage,
       // Pipeline dots for visualization
       dot_input: hasInput || hasSpine || hasDesign || hasWrite || hasFinal,

@@ -68,6 +68,7 @@ Dashboard 负责：
 
 1. 点火 / 建项目
    - ignite fantasy
+   - ignite mecha
    - ignite EP1
    - ignite EP2
 
@@ -112,13 +113,14 @@ Dashboard 负责：
 - ignite EP1
 
 系统会做这些事：
-1. 建立项目骨架
-2. 创建 skill_context/
-3. 创建 ep1/workspace/
-4. 创建 ep1/user_input.md
-5. 让你填写 user_input.md
-6. Agent 读取 user_input.md
-7. 从 user_input 派生出全局锚点文件
+1. 先确认题材（fantasy / mecha）
+2. 建立项目骨架
+3. 创建 skill_context/
+4. 创建 ep1/workspace/
+5. 创建 ep1/user_input.md
+6. 让你填写 user_input.md
+7. Agent 读取 user_input.md
+8. 从 user_input 派生出全局锚点文件
 
 这里有一个重要原则：
 user_input.md 是你的原始输入，是作品最终是否带有你的思想、带有你的灵魂的关键。
@@ -152,6 +154,12 @@ user_input.md 是你的原始输入，是作品最终是否带有你的思想、
 6. 自动进入 spine-qc
 7. 输出 ep1/workspace/spine-qc.md
 
+如果题材是 mecha，Spine 还会额外读取并推进：
+- 机体锚点
+- 科技锚点
+- 阵营锚点
+- 对应设定集（机体 / 科技 / 阵营 / 舰艇）
+
 这一步结束后不会自动进入下一个创作阶段。
 必须由你决定是否继续。
 
@@ -162,7 +170,9 @@ user_input.md 是你的原始输入，是作品最终是否带有你的思想、
 
 系统会：
 1. 读取 ep-spine.md
-2. 读取人物锚点 / 技能锚点 / 宝物锚点 / writing-rules.md
+2. 读取人物锚点 / 题材对象锚点 / writing-rules.md
+   - fantasy：技能锚点 / 宝物锚点
+   - mecha：机体锚点 / 科技锚点 / 阵营锚点
 3. 为本 EP 的全部 Scene 生成设计稿
 4. 输出综合文件：epN/workspace/epN-design.md
 5. 自动进入 design-qc
@@ -205,21 +215,29 @@ anchor-update-draft 不是自动写回全局锚点的。
 
 ## 5. 项目目录怎么理解
 
-一个标准项目大概长这样：
+一个标准项目大概长这样（fantasy / mecha 共用主骨架，按题材决定附加对象）：
 
 ```text
 my-project/
 ├── skill_context/
+│   ├── genre.md                   # 题材：fantasy / mecha
 │   ├── 人物锚点.md
-│   ├── 技能锚点.md
-│   ├── 宝物锚点.md
 │   ├── EP锚点.md
 │   ├── writing-rules.md
 │   ├── writing-style-sample.md
 │   ├── 人物设定集/
-│   ├── 技能设定集/
-│   ├── 宝物设定集/
-│   └── 地域设定集/
+│   ├── （fantasy）技能锚点.md
+│   ├── （fantasy）宝物锚点.md
+│   ├── （fantasy）技能设定集/
+│   ├── （fantasy）宝物设定集/
+│   ├── （fantasy）地域设定集/
+│   ├── （mecha）机体锚点.md
+│   ├── （mecha）科技锚点.md
+│   ├── （mecha）阵营锚点.md
+│   ├── （mecha）机体设定集/
+│   ├── （mecha）科技设定集/
+│   ├── （mecha）阵营设定集/
+│   └── （mecha）舰艇设定集/
 ├── ep1/
 │   ├── user_input.md
 │   ├── ep1.md
@@ -342,10 +360,9 @@ PROJECT_PATH=<project_root> npm run dev
 它会把全局信息按对象重新组织，而不是直接把 markdown 文件堆给你看。
 
 这里通常包括：
-- 人物锚点
-- 技能锚点
-- 宝物锚点
-- 地域设定集
+- 人物设定集
+- fantasy：技能锚点 / 宝物锚点 / 地域设定集
+- mecha：机体设定集 / 科技设定集 / 阵营设定集 / 舰艇设定集
 - EP锚点
 - 待写回结算项
 
@@ -426,7 +443,7 @@ PROJECT_PATH=<project_root> npm run dev
 路径类似：
 - /episodes/epN/draft
 
-它不是正文页，而是“当前判断页”。
+它不是正文页，而是"当前判断页"。
 
 它主要回答：
 - 这一章现在卡在哪
@@ -446,10 +463,20 @@ PROJECT_PATH=<project_root> npm run dev
 特点：
 - 只读
 - 显示 epN/epN.md
-- 会带少量“影响与回跳”信息
+- 会带少量"影响与回跳"信息
 - 重点就是读成稿，而不是继续流程解释
 
 如果你只是想当读者看这一章，去 final 页就行。
+
+### 8.7 上下文感知的入口路由
+
+总览页 EP 状态表中的"打开"链接不是固定路径，而是根据文件状态自动推导：
+
+- 存在 `anchor-update-draft.md`（未写回） → `/episodes/epN/draft`
+- 存在最终稿（已写完） → `/episodes/epN/final`
+- 其他情况 → `/episodes/epN`（编辑器）
+
+这意味着你不需要手动判断该点进哪个页面，系统会引导你去当前最该处理的地方。
 
 ## 9. dashboard 的编辑能力有哪些
 
