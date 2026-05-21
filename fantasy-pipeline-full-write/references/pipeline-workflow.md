@@ -7,7 +7,7 @@ flowchart TD
         I2{"项目已存在？"}
         I3[/"用户填写 user_input.md（自然语言原文）"/]
         I4["Agent 创建 user_input 模板\n并生成 skill_context/"]
-        I5["展示提取结果给用户\n人物锚点 + 写作纲领 + 技能/宝物锚点"]
+        I5["展示提取结果给用户\n人物锚点 + writing-rules + 技能/宝物锚点"]
         I6[/"用户确认"/]
         I1 --> I2
         I2 -->|"目录不存在"| I3
@@ -50,8 +50,8 @@ flowchart TD
     WRITE_TRIGGER[/"用户说 开始写\n/ 开始 write"/]
 
     subgraph WRITE["④ 写作"]
-        W1["fantasy-scene-write\n一口气写完所有 Scene"]
-        W2["写作产出只落在 ep{N}/workspace/ep{N}.md\nQC后复制为 ep{N}/ep{N}.md（唯一最终稿路径）"]
+        W1["fantasy-scene-write\n逐 Scene 写出正文过程稿"]
+        W2["写作产出落在 ep{N}/workspace/ep{N}-scene{X}.md\n用户确认收尾后生成 ep{N}/ep{N}.md（唯一最终稿路径）"]
         W3["fantasy-write-qc\n全稿 QC（只 RECORD，输出 write-qc.md）"]
         W4["生成 anchor-update-draft.md（对象级变更单元）\n等待用户先确认草案、再决定是否写回全局锚点"]
         W5[/"若 anchor draft 已结清 → EP{N} 完成\n若未结清 → 阻塞下次 ignite"/]
@@ -100,8 +100,8 @@ flowchart TD
 |------|------|------|---------|
 | **① Ignite** | `ignite fantasy` / `ignite EP{N}` | skill_context + user_input | 展示结果 → 用户确认 |
 | **② Spine** | `EP{N} spine` 等 | ep{N}/workspace/ep-spine.md | spine-qc PASS → 用户确认 |
-| **③ Scene Design** | `开始设计` / `开始 design` / `EP{N} 设计` | scene{X}-design.md（全量） | design-qc → 用户手动触发写作 |
-| **④ 写作** | `开始写` / `开始 write` / `进入写作` / `EP{N} 写作` | ep{N}.md + anchor-update-draft.md + write-qc.md | write-qc → 用户先确认锚点草案 / 再决定是否更新锚点 / 下次 ignite 前强制结清 → EP完成 |
+| **③ Scene Design** | `开始设计` / `开始 design` / `EP{N} 设计` | scene{X}-design.md（全量） | scene-design-qc → 用户手动触发写作 |
+| **④ 写作** | `开始写` / `开始 write` / `进入写作` / `EP{N} 写作` | ep{N}-scene{X}.md + anchor-update-draft.md + write-qc.md | write-qc → 用户先确认 Scene 过程稿与锚点草案 / 再决定是否更新锚点 / 下次 ignite 前强制结清 → EP完成 |
 
 ---
 
@@ -118,6 +118,6 @@ flowchart TD
 
 - `ep{N}/workspace/write-qc.md`：保存全稿 QC 报告
 - `ep{N}/workspace/anchor-update-draft.md`：保存候选锚点更新
-- `ep{N}/ep{N}.md`：保存最终稿
+- `ep{N}/ep{N}.md`：保存最终稿（仅在用户确认收尾后生成）
 - 若 draft 已应用：本章完成，可进入下一章 ignite
 - 若 draft 未应用：本章正文虽完成，但下一次 `ignite EP{N+1}` 前必须先结清

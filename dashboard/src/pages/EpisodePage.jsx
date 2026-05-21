@@ -10,24 +10,56 @@ const TABS = [
   { key: 'write', label: 'Write', icon: '✍️' },
 ]
 
-// Files to look up per tab, in display order
 const TAB_FILES = {
-  ignite: [
-    { key: 'user_input', label: '用户输入', path: (ep) => `ep${ep}/user_input.md`, editable: true },
+  ignite: (ep) => [
+    { key: 'user_input', label: '用户输入', relPath: `ep${ep}/user_input.md`, editable: true },
   ],
-  spine: [
-    { key: 'spine', label: '脊骨设计', path: (ep) => `ep${ep}/workspace/ep-spine.md`, editable: true },
-    { key: 'spine_qc', label: '脊骨核验', path: (ep) => `ep${ep}/workspace/spine-qc.md`, editable: true },
+  spine: (ep) => [
+    { key: 'spine', label: '脊骨设计', relPath: `ep${ep}/workspace/ep-spine.md`, editable: true },
+    { key: 'spine_qc', label: '脊骨核验', relPath: `ep${ep}/workspace/spine-qc.md`, editable: true },
   ],
-  design: [
-    { key: 'design', label: 'Scene 设计', path: (ep) => `ep${ep}/workspace/ep${ep}-design.md`, editable: true },
-    { key: 'design_qc', label: '设计核验', path: (ep) => `ep${ep}/workspace/design-qc.md`, editable: true },
-  ],
-  write: [
-    { key: 'manuscript', label: '正文（中间稿）', path: (ep) => `ep${ep}/workspace/ep${ep}.md`, editable: true },
-    { key: 'write_qc', label: '写作核验', path: (ep) => `ep${ep}/workspace/write-qc.md`, editable: true },
-    { key: 'draft', label: '锚点结算单', path: (ep) => `ep${ep}/workspace/anchor-update-draft.md`, editable: true },
-  ],
+}
+
+function compareSceneFiles(a, b) {
+  const getNum = (text) => Number(text.match(/scene(\d+)/)?.[1] || 0)
+  return getNum(a.relativePath) - getNum(b.relativePath)
+}
+
+function buildDynamicTabFiles(files, ep, tab) {
+  const workspace = `ep${ep}/workspace/`
+
+  if (tab === 'design') {
+    return files
+      .filter((file) => file.relativePath.startsWith(workspace) && /scene\d+-design\.md$/.test(file.relativePath))
+      .sort(compareSceneFiles)
+      .map((file) => ({
+        key: file.relativePath,
+        label: file.relativePath.split('/').pop()?.replace('.md', '') || file.relativePath,
+        relPath: file.relativePath,
+        editable: true,
+      }))
+      .concat([
+        { key: 'design_qc', label: '设计核验', relPath: `ep${ep}/workspace/scene-design-qc.md`, editable: true },
+      ])
+  }
+
+  if (tab === 'write') {
+    return files
+      .filter((file) => file.relativePath.startsWith(workspace) && new RegExp(`ep${ep}-scene\\d+\\.md$`).test(file.relativePath))
+      .sort(compareSceneFiles)
+      .map((file) => ({
+        key: file.relativePath,
+        label: file.relativePath.split('/').pop()?.replace('.md', '') || file.relativePath,
+        relPath: file.relativePath,
+        editable: true,
+      }))
+      .concat([
+        { key: 'write_qc', label: '写作核验', relPath: `ep${ep}/workspace/write-qc.md`, editable: true },
+        { key: 'draft', label: '锚点结算单', relPath: `ep${ep}/workspace/anchor-update-draft.md`, editable: true },
+      ])
+  }
+
+  return TAB_FILES[tab]?.(ep) || []
 }
 
 export function EpisodePage() {
@@ -64,12 +96,11 @@ export function EpisodePage() {
   }
 
   // Available files for current tab
-  const tabFiles = TAB_FILES[activeTab] || []
+  const tabFiles = buildDynamicTabFiles(files, epNum, activeTab)
   const availableFiles = tabFiles
     .map((def) => {
-      const relPath = def.path(epNum)
-      const exists = fileExists(relPath)
-      return { ...def, relPath, exists, content: exists ? readFileContent(relPath) : '' }
+      const exists = fileExists(def.relPath)
+      return { ...def, exists, content: exists ? readFileContent(def.relPath) : '' }
     })
     // Show all pipeline entries regardless of existence, so user sees what's next
 

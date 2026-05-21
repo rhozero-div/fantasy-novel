@@ -142,11 +142,20 @@ function summarizeDraftRecord(file) {
   }
 }
 
+function countSceneDesignFiles(epNumber) {
+  return rawFiles.filter((file) => file.relativePath === `ep${epNumber}/workspace/scene-design-qc.md` ? false : file.relativePath.startsWith(`ep${epNumber}/workspace/scene`) && /-design\.md$/.test(file.relativePath)).length
+}
+
+function countSceneWriteFiles(epNumber) {
+  return rawFiles.filter((file) => file.relativePath.startsWith(`ep${epNumber}/workspace/ep${epNumber}-scene`) && file.relativePath.endsWith('.md')).length
+}
+
 function buildStageSlots(epNumber) {
   const prefix = `ep${epNumber}`
   const workspace = `${prefix}/workspace`
-  const hasSceneFiles = rawFiles.some((file) => file.relativePath.startsWith(`${workspace}/scene`))
-  const finalExists = exists(`${workspace}/ep${epNumber}.md`) || exists(`${prefix}/ep${epNumber}.md`)
+  const designCount = countSceneDesignFiles(epNumber)
+  const writeCount = countSceneWriteFiles(epNumber)
+  const finalExists = exists(`${prefix}/ep${epNumber}.md`)
   const draftExists = exists(`${workspace}/anchor-update-draft.md`)
 
   return [
@@ -188,10 +197,10 @@ function buildStageSlots(epNumber) {
     },
     {
       name: 'Scene Design',
-      status: hasSceneFiles ? '已开始' : '未开始',
-      statusClass: hasSceneFiles ? 'done' : 'empty',
+      status: designCount > 0 ? '已开始' : '未开始',
+      statusClass: designCount > 0 ? 'done' : 'empty',
       slots: rawFiles
-        .filter((file) => file.relativePath.startsWith(`${workspace}/scene`) && file.relativePath.endsWith('.md'))
+        .filter((file) => file.relativePath.startsWith(`${workspace}/scene`) && (/-design\.md$/.test(file.relativePath) || file.relativePath.endsWith('scene-design-qc.md')))
         .map((file) => ({
           name: file.relativePath.includes('qc') ? '设计核验' : file.relativePath.split('/').pop()?.replace('.md', ''),
           badge: '已生成',
@@ -206,27 +215,34 @@ function buildStageSlots(epNumber) {
     },
     {
       name: 'Write',
-      status: finalExists ? '已完成' : '等待上游',
-      statusClass: finalExists ? 'done' : 'blocked',
-      slots: [
-        {
-          name: '本章正文',
-          badge: finalExists ? '已生成' : '未生成',
-          tone: finalExists ? 'blue' : 'red',
-          meta: finalExists ? '本章正文已生成。' : '写作阶段尚未完成。',
-          missing: !finalExists,
-          blocked: !finalExists,
-        },
-        {
-          name: '锚点结算单',
-          badge: draftExists ? summarizeStatus(read(`${workspace}/anchor-update-draft.md`)) : '尚未到达',
-          tone: draftExists ? toneFromStatus(summarizeStatus(read(`${workspace}/anchor-update-draft.md`))) : 'gray',
-          meta: draftExists ? '本章写作结束后的跨 EP 结算动作。' : '写作结束后才会出现。',
-          active: draftExists,
-          warning: draftExists && /unapplied/i.test(read(`${workspace}/anchor-update-draft.md`)),
-          missing: !draftExists,
-        },
-      ],
+      status: writeCount > 0 ? '已开始' : '等待上游',
+      statusClass: writeCount > 0 ? 'done' : 'blocked',
+      slots: rawFiles
+        .filter((file) => file.relativePath.startsWith(`${workspace}/ep${epNumber}-scene`) && file.relativePath.endsWith('.md'))
+        .map((file) => ({
+          name: file.relativePath.split('/').pop()?.replace('.md', ''),
+          badge: '已生成',
+          tone: 'blue',
+          meta: '本场景正文过程稿。',
+        }))
+        .concat([
+          {
+            name: '写作核验',
+            badge: exists(`${workspace}/write-qc.md`) ? '已记录' : '未生成',
+            tone: exists(`${workspace}/write-qc.md`) ? 'orange' : 'gray',
+            meta: exists(`${workspace}/write-qc.md`) ? '写作核验已落盘。' : '等待 Scene 正文过程稿完成后生成。',
+            missing: !exists(`${workspace}/write-qc.md`),
+          },
+          {
+            name: '锚点结算单',
+            badge: draftExists ? summarizeStatus(read(`${workspace}/anchor-update-draft.md`)) : '尚未到达',
+            tone: draftExists ? toneFromStatus(summarizeStatus(read(`${workspace}/anchor-update-draft.md`))) : 'gray',
+            meta: draftExists ? '本章写作结束后的跨 EP 结算动作。' : '写作结束后才会出现。',
+            active: draftExists,
+            warning: draftExists && /unapplied/i.test(read(`${workspace}/anchor-update-draft.md`)),
+            missing: !draftExists,
+          },
+        ]),
     },
     {
       name: 'Final',
@@ -970,13 +986,13 @@ export const dashboardData = {
   episodes: episodeNumbers.map((ep) => {
     const hasDraft = exists(`ep${ep}/workspace/anchor-update-draft.md`)
     const draftText = read(`ep${ep}/workspace/anchor-update-draft.md`)
-    const hasFinal = exists(`ep${ep}/workspace/ep${ep}.md`) || exists(`ep${ep}/ep${ep}.md`)
+    const hasFinal = exists(`ep${ep}/ep${ep}.md`)
     const hasInput = exists(`ep${ep}/user_input.md`)
     const hasSpine = exists(`ep${ep}/workspace/ep-spine.md`)
     const hasSpineQc = exists(`ep${ep}/workspace/spine-qc.md`)
-    const hasDesign = exists(`ep${ep}/workspace/ep${ep}-design.md`)
-    const hasDesignQc = exists(`ep${ep}/workspace/design-qc.md`)
-    const hasWrite = exists(`ep${ep}/workspace/ep${ep}.md`)
+    const hasDesign = countSceneDesignFiles(ep) > 0
+    const hasDesignQc = exists(`ep${ep}/workspace/scene-design-qc.md`)
+    const hasWrite = countSceneWriteFiles(ep) > 0
     const hasWriteQc = exists(`ep${ep}/workspace/write-qc.md`)
 
     let      stage = '空白'
@@ -1013,7 +1029,7 @@ export const dashboardData = {
       stage = '设计核验'
       statusText = '待写作'
       statusClass = 'status-next'
-      note = '设计核验通过，等待写作'
+      note = '设计核验通过，等待 Scene 正文过程稿'
       next = '开始写作'
     } else if (hasDesign) {
       stage = '设计'
@@ -1068,7 +1084,7 @@ export const dashboardData = {
 export const episodeIndex = episodeNumbers.map((ep) => {
   const links = []
   if (exists(`ep${ep}/workspace/anchor-update-draft.md`)) links.push({ label: '打开结算单', to: `/episodes/ep${ep}/draft` })
-  if (exists(`ep${ep}/workspace/ep${ep}.md`) || exists(`ep${ep}/ep${ep}.md`)) links.push({ label: '打开成稿', to: `/episodes/ep${ep}/final` })
+  if (exists(`ep${ep}/ep${ep}.md`)) links.push({ label: '打开成稿', to: `/episodes/ep${ep}/final` })
   if (exists(`ep${ep}/user_input.md`)) links.push({ label: '打开输入', to: `/episodes/ep${ep}/input` })
   links.push({ label: '查看全局对象', to: '/globals' })
 
@@ -1081,7 +1097,7 @@ export const episodeIndex = episodeNumbers.map((ep) => {
     status: episodeStatus?.statusText || '未知',
     description: exists(`ep${ep}/workspace/anchor-update-draft.md`)
       ? '包含锚点结算单，可用于验证本章完成后的结算动作。'
-      : exists(`ep${ep}/workspace/ep${ep}.md`) || exists(`ep${ep}/ep${ep}.md`)
+      : exists(`ep${ep}/ep${ep}.md`)
         ? '已有成品稿，可作为成稿阅读页样板。'
         : '当前以输入 / 前期文件为主。',
     links,
@@ -1089,7 +1105,7 @@ export const episodeIndex = episodeNumbers.map((ep) => {
 })
 
 export const episodeDetailRoutes = episodeNumbers.flatMap((ep) => {
-  const hasFinal = exists(`ep${ep}/workspace/ep${ep}.md`) || exists(`ep${ep}/ep${ep}.md`)
+  const hasFinal = exists(`ep${ep}/ep${ep}.md`)
   const routes = [{
     type: 'draft',
     path: `/episodes/ep${ep}/draft`,

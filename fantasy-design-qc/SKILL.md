@@ -1,6 +1,6 @@
 ---
 name: fantasy-design-qc
-description: 幻想小说 Scene Design 质量核验。一次扫描综合 Scene Design 文件（`ep{N}/workspace/ep{N}-design.md`），扫描弧光落地/Combat Mode/Scene Arc/锚点变更/衔接连贯性，只 RECORD 不 FAIL，输出结构化核验报告。触发词：「QC Scene Design」「核验 Scene 设计」。
+description: 幻想小说 Scene Design 质量核验。一次扫描逐 Scene Design 文件（`ep{N}/workspace/scene{X}-design.md`），扫描弧光落地/Combat Mode/Scene Arc/锚点变更/衔接连贯性，只 RECORD 不 FAIL，输出结构化核验报告。触发词：「QC Scene Design」「核验 Scene 设计」。
 type: protocol
 pattern: sequential
 category: creative
@@ -19,7 +19,7 @@ date_updated: 2026-05-13
 ## 输入
 
 1. EP Spine：`ep{N}/workspace/ep-spine.md`
-2. Scene Design 综合文件：`ep{N}/workspace/ep{N}-design.md`
+2. Scene Design 全量文件：`ep{N}/workspace/scene{X}-design.md`
 3. 题材参数：从 `ep{N}/user_input.md` 读取
 
 ## 操作流程
@@ -30,17 +30,17 @@ date_updated: 2026-05-13
 
 - `ep{N}/workspace/ep-spine.md`
 - `ep{N}/user_input.md`
-- `ep{N}/workspace/ep{N}-design.md`
+- `ep{N}/workspace/scene{X}-design.md`（至少 1 个，直到 Scene 总数 S）
 
 不完整 → 暂停，要求补充。
 
-从 `ep{N}/workspace/ep-spine.md` 读取 Scene 总数 S，校验设计文档中是否包含全部 Scene。
+从 `ep{N}/workspace/ep-spine.md` 读取 Scene 总数 S，校验 `scene1-design.md` 到 `sceneS-design.md` 是否齐全。
 
 ### Step 2: 弧光落地扫描
 
 逐 Scene 检查设计文档中的「弧光任务」是否能在写作层面落地：
 
-1. 从每个设计文档提取 Scene 的弧光任务（小位移：A → B）
+1. 从每个 Scene 设计文件提取该 Scene 的弧光任务（小位移：A → B）
 2. 检查设计文档是否写明了「收束后角色状态前进了哪一步」
 3. 没有明确位移终点 → 记录「弧光落地不明确：Scene X」
 
@@ -61,14 +61,14 @@ date_updated: 2026-05-13
 
 检查每个 Scene 的 Scene Arc 标注：
 
-1. 从设计文档提取 Scene Arc 类型
+1. 从每个 Scene 设计文件提取 Scene Arc 类型
 2. 对照 `references/scene-arc.md`
 3. 文戏/武戏 Scene 但无 Arc 标注 → 记录「Scene Arc 缺失标注：Scene X」
 4. Arc 类型与 Scene 叙事功能不符 → 记录「Arc 类型与叙事功能轻度不符：Scene X」
 
 ### Step 5: 锚点变更标注扫描（题材通用）
 
-检查每个设计文档末尾是否有「锚点变更」标注：
+检查每个 Scene 设计文件末尾是否有「锚点变更」标注：
 
 1. 如本 Scene 有变更，设计文档必须注明变更内容
 2. fantasy：技能/宝物变更（获得/升级/易主）漏注 → 记录「锚点变更漏注：Scene X（技能/宝物变更未标注）」
@@ -99,7 +99,7 @@ date_updated: 2026-05-13
 
 所有检查项无论通过与否，**一律记入报告**，不阻塞。
 
-输出格式：`ep{N}/workspace/design-qc.md`
+输出格式：`ep{N}/workspace/scene-design-qc.md`
 
 报告结构：
 - **弧光落地**：逐 Scene 弧光节点检查结果
@@ -117,7 +117,7 @@ QC 完成后，告知用户：
 ```
 EP{N} Scene Design QC 完成。
 
-全部 {S} 个 Scene Design 已扫描，RECORD 报告已写入 ep{N}/workspace/design-qc.md。
+全部 {S} 个 Scene Design 已扫描，RECORD 报告已写入 ep{N}/workspace/scene-design-qc.md。
 
 下一步：用户手动触发 EP{N} 写作。
 ```
@@ -132,4 +132,3 @@ EP{N} Scene Design QC 完成。
 - 所有项均为 RECORD，不 FAIL，不阻塞流程
 - 不自动触发下游任务（由 pipeline 控制）
 - 是否返工由用户或上层调度决定，本 skill 只 RECORD，不裁决
-

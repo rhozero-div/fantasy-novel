@@ -33,9 +33,10 @@ repo 主要由四部分组成：
    - 本地网页工作台
    - 用来浏览项目、切换项目、编辑 markdown、查看状态
 
-4. references
-   - 放在各 skill 目录下
-   - 用来定义工作流、模板、质检规则、写作规则
+4. adapters / references
+   - canonical references 放在各 skill 目录下
+   - 平台特定执行示例放在 `adapters/`
+   - 用来定义工作流、模板、质检规则、写作规则与各平台接法
 
 ## 2. 先理解核心分工
 
@@ -174,9 +175,9 @@ user_input.md 是你的原始输入，是作品最终是否带有你的思想、
    - fantasy：技能锚点 / 宝物锚点
    - mecha：机体锚点 / 科技锚点 / 阵营锚点
 3. 为本 EP 的全部 Scene 生成设计稿
-4. 输出综合文件：epN/workspace/epN-design.md
+4. 输出逐 Scene 设计文件：epN/workspace/scene1-design.md ... sceneS-design.md
 5. 自动进入 design-qc
-6. 输出 design-qc.md
+6. 输出 scene-design-qc.md
 
 这一层的作用是把“骨架”变成“可直接写作的合同”。
 
@@ -187,11 +188,11 @@ user_input.md 是你的原始输入，是作品最终是否带有你的思想、
 
 系统会：
 1. 读取 ep-spine.md
-2. 读取 epN-design.md
+2. 读取 scene1-design.md ... sceneS-design.md
 3. 读取 skill_context 下的全局约束
 4. 可选读取 writing-style-sample.md
-5. 一口气写完整个 EP
-6. 输出中间稿：epN/workspace/epN.md
+5. 按 Scene 写出正文过程稿
+6. 输出：epN/workspace/epN-scene1.md ... epN-sceneS.md
 7. 自动进入 write-qc
 
 ### 阶段 4：Write QC + 锚点结算
@@ -199,7 +200,7 @@ user_input.md 是你的原始输入，是作品最终是否带有你的思想、
 write-qc 会继续做：
 1. 输出 QC 报告：epN/workspace/write-qc.md
 2. 生成锚点结算单：epN/workspace/anchor-update-draft.md
-3. 复制最终稿到：epN/epN.md
+3. 用户确认收尾后，合并 Scene 过程稿并生成最终稿：epN/epN.md
 
 到这里，一个 EP 才算真正收尾。
 
@@ -243,10 +244,14 @@ my-project/
 │   ├── ep1.md
 │   └── workspace/
 │       ├── ep-spine.md
-│       ├── ep1-design.md
-│       ├── ep1.md
+│       ├── scene1-design.md
+│       ├── scene2-design.md
+│       ├── ...
+│       ├── ep1-scene1.md
+│       ├── ep1-scene2.md
+│       ├── ...
 │       ├── spine-qc.md
-│       ├── design-qc.md
+│       ├── scene-design-qc.md
 │       ├── write-qc.md
 │       └── anchor-update-draft.md
 └── ep2/
@@ -418,11 +423,11 @@ PROJECT_PATH=<project_root> npm run dev
    - epN/workspace/spine-qc.md
 
 3. Design tab
-   - epN/workspace/epN-design.md
-   - epN/workspace/design-qc.md
+   - epN/workspace/scene1-design.md ... sceneS-design.md
+   - epN/workspace/scene-design-qc.md
 
 4. Write tab
-   - epN/workspace/epN.md
+   - epN/workspace/epN-scene1.md ... epN-sceneS.md
    - epN/workspace/write-qc.md
    - epN/workspace/anchor-update-draft.md
 

@@ -24,12 +24,12 @@
 
 1. **阶段内 QC 可以自动衔接**
    - Spine → spine-qc
-   - Scene Design → design-qc
+   - Scene Design → scene-design-qc
    - Write → write-qc
 
 2. **QC 之后不得自动进入下一创作阶段**
    - spine-qc 之后：等用户确认再进入 Scene Design
-   - design-qc 之后：等用户确认再进入 Write
+   - scene-design-qc 之后：等用户确认再进入 Write
    - write-qc 之后：等用户决定是否处理锚点更新草案
 
 3. **write-qc 只生成 `anchor-update-draft.md`**

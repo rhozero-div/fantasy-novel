@@ -51,7 +51,7 @@ project/
 │   ├── 技能锚点.md
 │   ├── 宝物锚点.md
 │   ├── EP锚点.md
-│   ├── 写作纲领.md
+│   ├── writing-rules.md
 │   ├── 技能设定集/
 │   └── 宝物设定集/
 └── ep1/
@@ -66,6 +66,7 @@ project/
 ## 锚点更新时机
 
 - **EP完成时（write-qc Step 8）**：生成 `anchor-update-draft.md`
+- **用户确认收尾时**：合并 `ep{N}-scene{X}.md` 为正式稿 `ep{N}.md`
 - **用户确认后**：将 draft 写入全局锚点
 - **EP{N+1} Ignite前**：若 draft 未结清，必须先应用后再继续
 - **EP{N+1} Spine时（ep-spine Step 1）**：从全局锚点读取入点

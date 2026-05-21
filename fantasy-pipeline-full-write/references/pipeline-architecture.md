@@ -14,10 +14,10 @@ ep{N}/                          ← EP 根目录
 │   ├── spine-qc.md            ← Spine QC 报告
 │   ├── scene{X}-design.md     ← Scene Design 输出
 │   ├── scene-design-qc.md     ← Scene Design QC 报告
-│   ├── ep{N}.md               ← 写作中间稿（所有 Scene 合并）
+│   ├── ep{N}-scene{X}.md      ← Scene 正文过程稿
 │   ├── anchor-update-draft.md ← write-qc 生成的全局锚点更新草案
 │   └── write-qc.md            ← 全稿 QC 报告
-└── ep{N}.md                   ← 最终稿（根目录，QC 后从 workspace 复制）
+└── ep{N}.md                   ← 最终稿（根目录，用户确认收尾后生成）
 ```
 
 **规则：中间产物进 `workspace/`，最终稿放根目录。**
@@ -39,6 +39,7 @@ ep{N}/                          ← EP 根目录
 ## 锚点职责
 
 - Spine 产出的是**计划状态**，写在 `ep{N}/workspace/ep-spine.md`
+- write 阶段只生成 `ep{N}/workspace/ep{N}-scene{X}.md`，不直接生成最终稿
 - write-qc 只生成 `ep{N}/workspace/anchor-update-draft.md`，不直接写入全局锚点
 - `anchor-update-draft.md` 必须按对象级变更单元组织，不得只写自由叙述
 - 每个变更单元至少包含：`objectType`、`objectName`、`sourceEP`、`targetFile`、`targetSection`、`before`、`draftProposal`、`reviewedConclusion`、`reviewStatus`、`applyStatus`
@@ -53,7 +54,7 @@ ep{N}/                          ← EP 根目录
 
 | 症状 | 检查位置 |
 |------|---------|
-| 把中间稿或 QC 报告写到根目录 | 路径表、各阶段输出说明 |
+| 把 Scene 过程稿或 QC 报告写到根目录 | 路径表、各阶段输出说明 |
 | 把 planning state 直接写入全局锚点 | Spine / write-qc / anchor 相关说明 |
 | 跳过 QC 后的用户确认直接推进下游 | 流程图、阶段推进规则 |
 | `user_input.md` 写成僵硬字段表单 | `project-skeleton/user_input-template.md` |

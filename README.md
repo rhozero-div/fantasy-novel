@@ -12,15 +12,15 @@
 
 # Fantasy Novel
 
-一个面向长篇小说创作的 Hermes Skill family：
+一个面向长篇小说创作的 skill family：
 支持两条题材写作分支：**fantasy（奇幻）** 与 **mecha（机甲）**。
-它包含 **pipeline 协议、7 个执行 skill、project skeleton、workflow references，以及一个本地 dashboard**。
+它包含 **canonical pipeline 协议、7 个执行 skill、project skeleton、platform adapters，以及一个本地 dashboard**。
 
 一句话说：**Agent 推进流程，文件系统保存产物，网页负责展示结构、承接人工判断与人工修改。**
 
 ## 前置要求
 
-- Hermes Agent（用于加载与执行 skills）
+- 任意支持本地文件与 prompt/skill 编排的 Agent（如 Hermes / opencode / Codex）
 - Node.js >= 18
 - npm
 
@@ -28,13 +28,14 @@
 
 ```text
 fantasy-novel/
-├── fantasy-pipeline-full-write/   # 总管线协议 + workflow / orchestration / skeleton
+├── fantasy-pipeline-full-write/   # 总管线协议 + workflow / skeleton
 ├── fantasy-ep-spine/              # EP 脊骨设计
 ├── fantasy-spine-qc/              # Spine 核验
 ├── fantasy-scene-design/          # Scene 设计（每个 Scene 单独一个 design 文件）
 ├── fantasy-design-qc/             # Design 核验
 ├── fantasy-scene-write/           # EP 全稿写作
 ├── fantasy-write-qc/              # 全稿核验 + anchor-update-draft
+├── adapters/                      # 平台执行层示例（opencode / Hermes / Codex）
 ├── dashboard/                     # 本地浏览器工作台
 └── words_from_the_builder.md      # 项目引言长文
 ```
@@ -68,7 +69,7 @@ PROJECTS_DIR=/Users/me/Hermes/projects,/Users/me/Repos
 
 参考模板见 [dashboard/.env.example](./dashboard/.env.example)。
 
-### 3. 在 Hermes 里跑 pipeline
+### 3. 在 Agent 里跑 pipeline
 
 这个 repo 本身不直接执行创作。真正的创作流程由 Hermes Agent 加载各 skill 后推进：
 
@@ -110,7 +111,7 @@ dashboard 负责看文件、看状态、改稿；Chatbox / Agent 负责真正推
 同一个 EP，在文件系统里会同时存在 **输入 / 过程件 / 最终稿** 三层：
 
 - `ep{N}/user_input.md` → 用户原始输入
-- `ep{N}/workspace/` → 过程层（spine / scene design / QC / write / anchor draft）
+- `ep{N}/workspace/` → 过程层（spine / scene design / QC / scene write / anchor draft）
 - `ep{N}/ep{N}.md` → 最终稿
 
 页面只是把这三层映射出来：
@@ -147,10 +148,14 @@ my-project/
 │   ├── ep1.md                     # 最终稿
 │   └── workspace/
 │       ├── ep-spine.md            # 脊骨设计
-│       ├── ep{N}-design.md         # Scene 设计综合文件
-│       ├── ep1.md                 # 写作中间稿
+│       ├── scene1-design.md        # Scene 1 设计
+│       ├── scene2-design.md        # Scene 2 设计
+│       ├── ...                     # 直到 sceneS-design.md
+│       ├── ep1-scene1.md           # Scene 1 正文过程稿
+│       ├── ep1-scene2.md           # Scene 2 正文过程稿
+│       ├── ...                     # 直到 ep1-sceneS.md
 │       ├── spine-qc.md            # 脊骨质检
-│       ├── design-qc.md            # 设计质检
+│       ├── scene-design-qc.md      # 设计质检
 │       ├── write-qc.md            # 写作质检
 │       └── anchor-update-draft.md # 锚点结算单
 ├── ep2/
@@ -176,7 +181,9 @@ my-project/
 - `words_from_the_builder.md`：为什么做这个项目、它想把手伸向谁
 - `README.md`：repo 导航与 dashboard / 文件结构说明
 - `fantasy-pipeline-full-write/references/pipeline-workflow.md`：正式工作流图
-- `fantasy-pipeline-full-write/references/opencode-orchestration.md`：opencode 多 agent 执行样例
+- `adapters/opencode/`：opencode 执行层示例
+- `adapters/hermes/`：Hermes 执行层示例
+- `adapters/codex/`：Codex 安装与多 agent 编排说明
 - `FAMILY_RUNTIME_POLICY.md`：public repo 与本地 runtime 的分层治理规则
 
 ## 技术栈
@@ -189,6 +196,26 @@ my-project/
 ---
 
 ## 版本更新历史
+
+> 注：以下历史记录用于说明演进路径。若与本文前面的当前文件契约冲突，以前文的 **current canonical contract** 为准。
+
+### v2.2 — 2026-05-21
+
+**Canonical contract 收口：**
+
+- Scene Design 恢复为 **逐 Scene 文件** 的 canonical process artifact：
+  - `scene1-design.md ... sceneS-design.md`
+- Scene Write 改为 **逐 Scene 正文过程稿**：
+  - `ep{N}-scene1.md ... ep{N}-sceneS.md`
+- `ep{N}.md` 只在**用户确认收尾后**生成，不再作为默认的 workspace 合并中间稿
+- `scene-design-qc.md` 成为当前唯一的 Design QC 文件名
+- `writing-style-sample.md` 与 `writing-rules.md` 一起成为正式写作入口
+- 新增 `next-ep-user_input-template.md`，避免 `EP{N+1}` 继续沿用 `EP1` 输入模板
+
+**平台适配层拆分：**
+
+- repo 显式引入 `adapters/opencode/`、`adapters/hermes/`、`adapters/codex/`
+- canonical protocol 与 execution adapter 进一步分层
 
 ### v2.1 — 2026-05-18
 
@@ -237,12 +264,12 @@ my-project/
 
 **Scene Design 文件格式变更：**
 
-- 从每 Scene 一个独立文件（scene1-design.md / scene2-design.md）改为综合文件 `ep{N}-design.md`，以 `## Scene {N}:` 标题分隔。
-- `fantasy-scene-design/fantasy-scene-write/fantasy-design-qc` 均同步更新输入/输出路径。
-- QC 输出文件名从 `scene-design-qc.md` 改为 `design-qc.md`。
+- 以下三条是 **v2.0 当时的中间态实现记录**，已被 `v2.2` 覆盖，不再代表当前 canonical contract：
+- 曾短暂从每 Scene 一个独立文件改为综合文件 `ep{N}-design.md`
+- 曾短暂把 Design QC 文件名切到 `design-qc.md`
+- 当前版本已恢复为 `scene{X}-design.md` + `scene-design-qc.md`
 
 **Dashboard 人物锚点解析修复：**
 
 - 人物锚点.md 使用 `## 角色名` 分段 + 每段内「项目\|内容」小表的格式，但 `extractMarkdownTable()` 把全部 `|` 行当一张大表解析，导致显示大量空行角色。
 - 新增 `parseCharacterSections()` 函数，按 `##` 标题分段解析，每段独立 key-value 转对象。
-

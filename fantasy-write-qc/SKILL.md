@@ -1,6 +1,6 @@
 ---
 name: fantasy-write-qc
-description: 幻想小说 EP 全稿质量核验。接收 `ep{N}.md`（全部 Scene 合并稿），扫描弧光落地、文戏质感（含对白压力/词频）、武戏质感、人物一致性、衔接连贯性，只 RECORD 不 FAIL，输出结构化核验报告。触发词：「QC」「核验」「质量核验」。
+description: 幻想小说 EP 全稿质量核验。接收 `ep{N}-scene{X}.md`（全部 Scene 正文过程稿），顺序视作整章进行核验，扫描弧光落地、文戏质感（含对白压力/词频）、武戏质感、人物一致性、衔接连贯性，只 RECORD 不 FAIL，输出结构化核验报告。触发词：「QC」「核验」「质量核验」。
 type: protocol
 pattern: sequential
 category: creative
@@ -12,11 +12,11 @@ date_updated: 2026-05-14
 
 ## 身份
 
-只核验，不创作。不修改正文；允许输出 QC 报告、锚点草案与最终稿复制，不改动被核验正文内容。**只 RECORD，不 FAIL**——所有问题记入报告，不阻塞流程。
+只核验，不创作。不修改正文；允许输出 QC 报告、锚点草案与最终成稿，不改动被核验正文内容。**只 RECORD，不 FAIL**——所有问题记入报告，不阻塞流程。
 
 ## 输入
 
-1. EP 全稿（中间稿）：`ep{N}/workspace/ep{N}.md`
+1. EP 全稿过程稿：`ep{N}/workspace/ep{N}-scene{X}.md`
 2. EP Spine：`ep{N}/workspace/ep-spine.md`
 3. Scene Design 全量：`ep{N}/workspace/scene{X}-design.md`
 4. 题材参数：从 `ep{N}/user_input.md` 读取
@@ -27,7 +27,7 @@ date_updated: 2026-05-14
 
 确认以下文件存在：
 
-- `ep{N}/workspace/ep{N}.md`
+- `ep{N}/workspace/ep{N}-scene{X}.md`（至少 1 个，直到 Scene 总数 S）
 - `ep{N}/workspace/ep-spine.md`
 - `ep{N}/user_input.md`
 
@@ -36,7 +36,7 @@ date_updated: 2026-05-14
 ### Step 2: 弧光完整性扫描
 
 1. 从 `ep{N}/workspace/ep-spine.md` 提取每个 Scene 的弧光节点
-2. 在全稿中搜索对应关键词（角色状态/行为变化）
+2. 在全部 Scene 正文过程稿的顺序串联结果中搜索对应关键词（角色状态/行为变化）
 3. 找到 → 标注「弧光已落地」。找不到 → 标注「弧光未落地」（RECORD）
 
 ### Step 3: 文戏质感扫描
@@ -76,7 +76,7 @@ grep -nE "不是.{0,30}(。她|。他)" "$FILE"
 
 ### Step 3.5: AI 腔扫描
 
-参考引用 `fantasy-pipeline-full-write/references/prose-standards.md` 第 2 章定义的 8 类通用禁止句式，逐类扫描全稿。
+参考引用 `fantasy-pipeline-full-write/references/prose-standards.md` 第 2 章定义的 8 类通用禁止句式，逐类扫描全部 Scene 正文过程稿。
 
 可使用文本搜索、正则或脚本扫描等方法辅助定位。下列正则仅为**示例扫描方法**：
 
@@ -158,7 +158,7 @@ grep -nE "(在任何一个现代|在那个没有.{0,6}的时代|相比于现代)
 - **衔接 RECORD**：弧光回退/动作重复列表
 - **总体评价**：本稿整体质量评估
 
-### Step 8: 生成锚点更新草案 + 复制最终稿
+### Step 8: 生成锚点更新草案 + 生成最终稿
 
 **生成锚点更新草案：**
 - 输出 `ep{N}/workspace/anchor-update-draft.md`
@@ -209,8 +209,10 @@ grep -nE "(在任何一个现代|在那个没有.{0,6}的时代|相比于现代)
 
 **本 step 不直接写入全局锚点。**
 
-**复制最终稿：**
-- 将 `ep{N}/workspace/ep{N}.md` 复制到 `ep{N}/ep{N}.md`（根目录，用户最终稿）
+**生成最终稿：**
+- 仅在用户确认收尾后，按 Scene 顺序将 `ep{N}/workspace/ep{N}-scene1.md` 到 `ep{N}-scene{S}.md` 合并为 `ep{N}/ep{N}.md`
+- `ep{N}/ep{N}.md` 是唯一正式成稿路径
+- 在用户确认之前，不要求生成 `workspace/ep{N}.md` 这类合并中间稿
 
 ### Step 9: 完成通知
 
@@ -219,7 +221,7 @@ grep -nE "(在任何一个现代|在那个没有.{0,6}的时代|相比于现代)
 ```
 EP{N} 全稿 QC 已完成。
 
-最终稿：ep{N}/ep{N}.md
+最终稿（确认收尾后生成）：ep{N}/ep{N}.md
 QC 报告：ep{N}/workspace/write-qc.md
 锚点更新草案：ep{N}/workspace/anchor-update-draft.md
 
@@ -229,7 +231,7 @@ QC 报告：ep{N}/workspace/write-qc.md
 ```
 
 **规则：**
-- write-qc 完成后，不直接更新全局锚点
+- write-qc 完成后，不直接更新全局锚点，也不强制立刻生成最终稿
 - 用户可先确认草案内容（`reviewStatus=confirmed`）
 - 用户也可进一步执行全局写回（`applyStatus=applied`）
 - 只有真正写回完成后，该 draft 才算结清

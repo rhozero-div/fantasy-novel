@@ -102,9 +102,14 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 
 标注主弧光 + 次弧光（如有混合）。
 
-### Step 5: 输出综合 Scene 设计文档
+### Step 5: 输出 Scene 设计文档
 
-按 `references/output-template.md` 格式输出，**所有 Scene 合并为一个综合文件**，写入 `ep{N}/workspace/ep{N}-design.md`。
+按 `references/output-template.md` 格式输出，**每个 Scene 单独一个设计文件**，写入：
+
+- `ep{N}/workspace/scene1-design.md`
+- `ep{N}/workspace/scene2-design.md`
+- ...
+- `ep{N}/workspace/scene{S}-design.md`
 
 每个 Scene 的设计内容必须显式包含一段 **Constraints Readback**，至少列出：
 - 使用的人物锚点
@@ -113,34 +118,23 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 - 本 Scene 不可违背的既成事实
 - **（mecha 题材附加）** 使用的机体 / 科技 / 阵营约束、机体状态入场基线
 
-**综合文件格式：**
+**单 Scene 文件格式：**
 ```markdown
-# EP{N} Scene Designs
-
----
-
-## Scene 1: {标题}
+# Scene {X}: {标题}
 
 {完整 Scene 设计内容}
-
----
-
-## Scene 2: {标题}
-
-{完整 Scene 设计内容}
-
----
-
-...直到 Scene S 全部完成
 ```
 
-以 `## Scene {N}:` 为 Scene 分隔标题，确保下游（写/QC）可通过标题层级逐 Scene 解析。
+每个文件只承载一个 Scene，确保下游（写/QC/dashboard）直接按文件粒度读取、编辑与追踪。
+
+如执行层或展示层需要合并阅读视图，可**额外**生成 `ep{N}/workspace/ep{N}-design.md`，但它只是 review artifact，不是写作层的真实输入，也不应作为 dashboard 的默认可编辑入口。
 
 ---
 
 ## 输出
 
-`ep{N}/workspace/ep{N}-design.md`（综合文件，含全部 Scene 设计）
+- `ep{N}/workspace/scene{X}-design.md`（canonical process artifact）
+- `ep{N}/workspace/ep{N}-design.md`（optional merged review artifact）
 
 **锚点变更标注：** 如本 Scene 有变更，在设计文档末尾注明候选变更：
 
@@ -168,7 +162,7 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 
 ## 已知断点
 
-- **路径**：输出必须为 `ep{N}/workspace/ep{N}-design.md`，不得写至 ep{N}/ 根目录
+- **路径**：canonical 输出必须为 `ep{N}/workspace/scene{X}-design.md`，不得写至 ep{N}/ 根目录
 - **全量输出**：本任务必须输出 Spine 中全部 Scene 的设计，不得遗漏
 
 ## 注意事项
@@ -178,4 +172,3 @@ Fantasy EP 的 Scene 级设计层。一次完成 Spine 中全部 Scene 的立题
 - **POV 默认**：所有在场角色 POV 全开，仅当显式写出「xxx 不开 POV」时关闭
 - **技能/宝物锚点**：scene-design 只负责标注候选变更；实际写入与汇总由后续阶段处理
 - **机体/科技/阵营锚点**：mecha 题材下同样规则，只标注候选变更，不直接写入全局
-
